@@ -1,4 +1,4 @@
-# Ortomax — sitio web
+# Orthomax — sitio web
 
 Proyecto estático basado en el mockup proporcionado.
 
@@ -18,7 +18,7 @@ Los mensajes se generan automáticamente según la acción del visitante.
 
 ## Personalización antes de publicar
 
-1. Sustituye las imágenes de Unsplash por las fotografías reales de Ortomax.
+1. Sustituye las imágenes de Unsplash por las fotografías reales de Orthomax.
 2. Cambia los enlaces de Facebook e Instagram por las cuentas reales.
 3. Verifica la dirección y horarios.
 4. Si el dominio será `nexoralpz.com`, configura el hosting y DNS después de subir el proyecto.

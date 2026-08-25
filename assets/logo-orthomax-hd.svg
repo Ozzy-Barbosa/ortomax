@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Logo Orthomax</title>
+  <desc id="desc">Logotipo dental turquesa de Orthomax sobre fondo blanco</desc>
+  <rect width="512" height="512" fill="#ffffff"/>
+  <path fill="#0aa4a8" d="M256 72c-93 0-154 65-154 155 0 58 24 101 41 148 12 34 16 73 31 105 10 22 28 34 45 30 23-6 21-57 38-57s15 51 38 57c17 4 35-8 45-30 15-32 19-71 31-105 17-47 41-90 41-148C410 137 349 72 256 72Z"/>
+  <path fill="#ffffff" d="M256 108c-58 0-107 43-107 111 0 40 16 71 29 105 12 33 16 81 31 86 7 2 13-4 16-15l13-53c3-12 11-19 18-19s15 7 18 19l13 53c3 11 9 17 16 15 15-5 19-53 31-86 13-34 29-65 29-105 0-68-49-111-107-111Z"/>
+  <path fill="#079a9f" d="M255 149 190 281h48l17-35 17 35h50l-67-132Zm0 51 21 43h-42l21-43Z"/>
+  <path fill="#4cbf83" d="M256 166 213 253h24l19-39 19 39h24l-43-87Z"/>
+  <path fill="#0aa4a8" d="M229 307h54l-9 26h-36l-9-26Z"/>
+</svg>

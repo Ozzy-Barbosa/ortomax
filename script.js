@@ -4,8 +4,31 @@ function whatsappUrl(message) {
   return `https://wa.me/${PHONE}?text=${encodeURIComponent(message)}`;
 }
 
-const defaultMessage = "Hola Ortomax, me gustaría solicitar información y agendar una cita.";
+const defaultMessage = "Hola Orthomax, me gustaría solicitar información y agendar una cita.";
 document.getElementById("floatingWa").href = whatsappUrl(defaultMessage);
+
+const appointmentDate = document.getElementById("appointmentDate");
+const appointmentTime = document.getElementById("appointmentTime");
+if (appointmentDate) {
+  const today = new Date();
+  today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+  appointmentDate.min = today.toISOString().split("T")[0];
+
+  appointmentDate.addEventListener("change", () => {
+    const selected = new Date(`${appointmentDate.value}T12:00:00`);
+    const day = selected.getDay();
+    const isSaturday = day === 6;
+    const isSunday = day === 0;
+
+    appointmentTime.querySelectorAll("option").forEach(option => {
+      if (!option.value) return;
+      option.hidden = isSunday || (isSaturday && ["2:00 pm", "3:00 pm", "4:00 pm", "5:00 pm", "6:00 pm"].includes(option.value));
+      option.disabled = option.hidden;
+    });
+    appointmentTime.value = "";
+    appointmentDate.setCustomValidity(isSunday ? "Selecciona un día de atención de lunes a sábado." : "");
+  });
+}
 
 const menuToggle = document.getElementById("menuToggle");
 const mainNav = document.getElementById("mainNav");
@@ -62,9 +85,12 @@ document.getElementById("appointmentForm").addEventListener("submit", e => {
 
   const name = document.getElementById("patientName").value.trim();
   const treatment = document.getElementById("patientTreatment").value;
+  const date = appointmentDate.value;
+  const time = appointmentTime.value;
   const extra = document.getElementById("patientMessage").value.trim();
+  const preferredDate = new Intl.DateTimeFormat("es-MX", { dateStyle: "full" }).format(new Date(`${date}T12:00:00`));
 
-  let message = `Hola Ortomax, soy ${name}. Me gustaría agendar una cita.\n\nTratamiento de interés: ${treatment}.`;
+  let message = `Hola Orthomax, soy ${name}. Me gustaría solicitar una cita.\n\nTratamiento de interés: ${treatment}.\nFecha preferida: ${preferredDate}.\nHora preferida: ${time}.\n\nEntiendo que el horario está sujeto a confirmación.`;
   if (extra) message += `\n\nMensaje: ${extra}`;
   message += "\n\nQuedo atento(a) a su respuesta.";
 
@@ -76,7 +102,7 @@ document.querySelectorAll(".wa-treatment").forEach(link => {
   link.addEventListener("click", e => {
     e.preventDefault();
     const treatment = link.dataset.treatment;
-    const message = `Hola Ortomax, me interesa recibir información sobre ${treatment}. ¿Podrían ayudarme con disponibilidad y precios?`;
+    const message = `Hola Orthomax, me interesa recibir información sobre ${treatment}. ¿Podrían ayudarme con disponibilidad y precios?`;
     window.open(whatsappUrl(message), "_blank", "noopener,noreferrer");
   });
 });

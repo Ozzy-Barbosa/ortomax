@@ -1,30 +1,48 @@
-# Orthomax — sitio web
+# Orthomax · Sitio del consultorio
 
-Proyecto estático basado en el mockup proporcionado.
+Sitio estático en español para Orthomax Centro Odontológico, La Paz, B.C.S. No necesita PHP, base de datos, servicios de pago ni Node.js en el hosting. Node.js 22 o posterior solo se utiliza para preparar y comprobar los archivos antes de subirlos.
 
-## Archivos
+## Trabajar y revisar
 
-- `index.html` — estructura de la página.
-- `styles.css` — diseño, responsive y animaciones.
-- `script.js` — menú móvil, modal de citas, galería/lightbox y WhatsApp.
+```sh
+npm run dev
+npm test
+npm run check
+npm run build -- --preview
+```
 
-## WhatsApp
+Vista local: http://127.0.0.1:4173. No es necesario ejecutar `npm install`: no hay dependencias de ejecución ni desarrollo. Abre la página mediante el servidor, no con `file://`, porque el JavaScript utiliza módulos.
 
-El botón de WhatsApp está configurado para:
+`dist/` contiene la salida de cada compilación y se reemplaza al compilar. No edites esa carpeta directamente. La compilación de vista previa lleva `noindex` y bloquea el rastreo; NO se debe usar como versión pública definitiva.
 
-**+52 612 142 9561**
+## Publicación cuando exista el dominio
 
-Los mensajes se generan automáticamente según la acción del visitante.
+1. Sigue `LANZAMIENTO.md` y confirma con la responsable teléfono, dirección, horarios, tratamientos, nombre comercial y privacidad.
+2. Edita `site.config.json`: `origin` debe ser el dominio real con `https://`, sin rutas, y marca las dos confirmaciones únicamente después de revisarlas.
+3. Ejecuta `npm test`, `npm run check` y `npm run build`.
+4. Ejecuta `node tools/check.mjs --dist`.
+5. Sube **solo el contenido de `dist/`**, incluyendo `.htaccess` si usas Apache. No subas la carpeta del proyecto, `.git`, pruebas o herramientas.
+6. Activa certificado HTTPS y la redirección al dominio canónico en el panel del proveedor. Comprueba la web publicada siguiendo la guía.
 
-## Personalización antes de publicar
+El build de producción genera las URLs canónicas, Open Graph, tarjeta de redes con una fotografía real existente, sitemap, robots indexable, datos estructurados Dentist y políticas de seguridad. Se detiene si falta el dominio o las confirmaciones. No inventa una dirección web.
 
-1. Sustituye las imágenes de Unsplash por las fotografías reales de Orthomax.
-2. Cambia los enlaces de Facebook e Instagram por las cuentas reales.
-3. Verifica la dirección y horarios.
-4. Si el dominio será `nexoralpz.com`, configura el hosting y DNS después de subir el proyecto.
+## Qué hace el sitio
 
-## Ejecutar localmente
+- Presentación del consultorio, servicios, tratamientos, primera visita, galería, preguntas frecuentes y ubicación.
+- Solicitudes de cita por WhatsApp, con nombre y preferencias; **no reserva horarios ni confirma citas automáticamente**.
+- Horarios filtrados por fecha, domingos y hora actual de La Paz (`America/Mazatlan`), validados de nuevo al continuar.
+- Diálogos nativos con navegación por teclado y Escape, menú adaptable, foco visible y movimiento reducido.
+- Enlaces directos de llamada, mapas y WhatsApp disponibles sin JavaScript. El formulario y la ampliación de imágenes requieren JavaScript.
+- Fuentes e iconos locales con sus licencias, imágenes diferidas salvo portada, mapa oficial incrustado y ausencia de analítica/cookies propias.
 
-Abre `index.html` con Live Server en VS Code.
+## Mantenimiento
 
-No requiere Node.js ni una base de datos para esta primera versión.
+- `index.html`: contenido, teléfono, dirección, horario, datos estructurados y fotografías. Mantén coherencia entre contenido visible y JSON-LD.
+- `appointment.js`: teléfono de WhatsApp, zona horaria y reglas de horario.
+- `script.js`: interacciones. `styles.css`: diseño y variantes adaptables.
+- `privacidad.html`: explicación del sitio, pendiente de validar/complementar con el aviso integral de la responsable.
+- `assets/ortomax/`: imágenes existentes. Requisitos y futuras fotografías en `LANZAMIENTO.md`.
+- `hosting/`: cabeceras para Apache y hosting estático compatible con `_headers`. La redirección HTTPS depende del proveedor.
+- `tools/vendor.mjs`: descarga opcional de fuentes originales y Font Awesome. Los archivos ya están incluidos; no se usa al compilar ni en producción.
+
+Tras modificar horarios, actualiza tanto la interfaz, FAQ si corresponde y JSON-LD de `index.html` como las reglas de `appointment.js` y sus pruebas. Tras añadir servicios, sincroniza tarjetas, formulario y metadatos. Conserva siempre los originales de las fotografías fuera de la carpeta pública.

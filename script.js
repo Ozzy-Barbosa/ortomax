@@ -1,156 +1,83 @@
-const PHONE = "526121429561";
-
-function whatsappUrl(message) {
-  return `https://wa.me/${PHONE}?text=${encodeURIComponent(message)}`;
+import { whatsappUrl, clinicNow, allowedHours, appointmentMessage } from './appointment.js';
+document.documentElement.classList.add('js');
+const $ = id => document.getElementById(id);
+const menu = $('mainNav');
+const toggle = $('menuToggle');
+function setMenu(open) {
+  menu.classList.toggle('open',open);
+  toggle.setAttribute('aria-expanded',String(open));
+  toggle.setAttribute('aria-label',open ? 'Cerrar menú' : 'Abrir menú');
 }
-
-const defaultMessage = "Hola Orthomax, me gustaría solicitar información y agendar una cita.";
-document.getElementById("floatingWa").href = whatsappUrl(defaultMessage);
-
-const appointmentDate = document.getElementById("appointmentDate");
-const appointmentTime = document.getElementById("appointmentTime");
-if (appointmentDate) {
-  const today = new Date();
-  today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
-  appointmentDate.min = today.toISOString().split("T")[0];
-
-  appointmentDate.addEventListener("change", () => {
-    const selected = new Date(`${appointmentDate.value}T12:00:00`);
-    const day = selected.getDay();
-    const isSaturday = day === 6;
-    const isSunday = day === 0;
-
-    appointmentTime.querySelectorAll("option").forEach(option => {
-      if (!option.value) return;
-      option.hidden = isSunday || (isSaturday && ["2:00 pm", "3:00 pm", "4:00 pm", "5:00 pm", "6:00 pm"].includes(option.value));
-      option.disabled = option.hidden;
-    });
-    appointmentTime.value = "";
-    appointmentDate.setCustomValidity(isSunday ? "Selecciona un día de atención de lunes a sábado." : "");
+toggle.addEventListener('click',()=>setMenu(!menu.classList.contains('open')));
+menu.addEventListener('click',event=>{ if(event.target.closest('a')) setMenu(false); });
+document.addEventListener('click',event=>{ if(!event.target.closest('.nav-wrap')) setMenu(false); });
+document.addEventListener('keydown',event=>{ if(event.key==='Escape' && menu.classList.contains('open')) { setMenu(false); toggle.focus(); } });
+matchMedia('(min-width:981px)').addEventListener('change',()=>setMenu(false));
+const modal = $('appointmentModal');
+const date = $('appointmentDate');
+const time = $('appointmentTime');
+const name = $('patientName');
+const options = [...time.options].slice(1);
+options.forEach((option,index)=>option.dataset.hour=index+9);
+function updateAvailability() {
+  date.min=clinicNow().date;
+  const available=allowedHours(date.value);
+  options.forEach(option=>{ option.disabled=!available.includes(Number(option.dataset.hour)); option.hidden=option.disabled; });
+  if(time.selectedOptions[0]?.disabled) time.value='';
+  date.setCustomValidity(date.value && !available.length ? 'Elige una fecha de lunes a sábado con horarios disponibles. Los horarios de hoy que ya pasaron no están disponibles.' : '');
+}
+date.addEventListener('change',()=>{ time.value=''; updateAvailability(); });
+name.addEventListener('input',()=>name.setCustomValidity(name.value.trim() ? '' : 'Escribe tu nombre.'));
+function openAppointment(event) {
+  event.preventDefault();
+  updateAvailability();
+  modal.showModal();
+  document.body.classList.add('no-scroll');
+  name.focus();
+}
+document.querySelectorAll('a[href="#cita"],#appointmentBtn').forEach(link=>link.addEventListener('click',openAppointment));
+$('modalClose').addEventListener('click',()=>modal.close());
+const lightbox=$('lightbox');
+for(const dialog of [modal,lightbox]) {
+  dialog.addEventListener('close',()=>document.body.classList.remove('no-scroll'));
+  dialog.addEventListener('click',event=>{
+    const box=dialog.getBoundingClientRect();
+    if(event.target===dialog && (event.clientX<box.left || event.clientX>box.right || event.clientY<box.top || event.clientY>box.bottom)) dialog.close();
   });
 }
-
-const menuToggle = document.getElementById("menuToggle");
-const mainNav = document.getElementById("mainNav");
-
-menuToggle.addEventListener("click", () => {
-  const open = mainNav.classList.toggle("open");
-  menuToggle.setAttribute("aria-expanded", open);
-  menuToggle.innerHTML = open
-    ? '<i class="fa-solid fa-xmark"></i>'
-    : '<i class="fa-solid fa-bars"></i>';
+$('appointmentForm').addEventListener('submit',event=>{
+  event.preventDefault();
+  updateAvailability();
+  name.setCustomValidity(name.value.trim() ? '' : 'Escribe tu nombre.');
+  if(!event.currentTarget.reportValidity()) return;
+  const message=appointmentMessage(name.value,$('patientTreatment').value,date.value,time.value);
+  // Same-tab navigation avoids popup blockers and retains Back navigation.
+  window.location.assign(whatsappUrl(message));
 });
-
-document.querySelectorAll("#mainNav a").forEach(link => {
-  link.addEventListener("click", () => {
-    mainNav.classList.remove("open");
-    menuToggle.setAttribute("aria-expanded", "false");
-    menuToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+$('floatingWa').href=whatsappUrl('Hola Orthomax, me gustaría solicitar información y agendar una cita.');
+document.querySelectorAll('.wa-treatment').forEach(link=>{
+  link.href=whatsappUrl(`Hola Orthomax, me interesa recibir información sobre ${link.dataset.treatment}. ¿Podrían ayudarme con disponibilidad y precios?`);
+  link.setAttribute('aria-label',`Consultar sobre ${link.dataset.treatment} por WhatsApp`);
+});
+document.querySelectorAll('.gallery-item').forEach(item=>{
+  item.setAttribute('aria-label',`Ampliar: ${item.querySelector('img').alt}`);
+  item.addEventListener('click',()=>{
+    $('lightboxImg').src=item.dataset.full;
+    $('lightboxImg').alt=item.querySelector('img').alt;
+    $('lightboxCaption').textContent=item.querySelector('img').alt;
+    lightbox.showModal();
+    document.body.classList.add('no-scroll');
   });
 });
-
-const appointmentModal = document.getElementById("appointmentModal");
-const appointmentBtn = document.getElementById("appointmentBtn");
-const modalClose = document.getElementById("modalClose");
-
-function openModal() {
-  appointmentModal.classList.add("open");
-  appointmentModal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("no-scroll");
-  setTimeout(() => document.getElementById("patientName").focus(), 100);
-}
-
-function closeModal() {
-  appointmentModal.classList.remove("open");
-  appointmentModal.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("no-scroll");
-}
-
-document.querySelectorAll('a[href="#cita"]').forEach(link => {
-  link.addEventListener("click", e => {
-    e.preventDefault();
-    openModal();
-  });
-});
-
-appointmentBtn.addEventListener("click", openModal);
-modalClose.addEventListener("click", closeModal);
-
-appointmentModal.addEventListener("click", e => {
-  if (e.target === appointmentModal) closeModal();
-});
-
-document.getElementById("appointmentForm").addEventListener("submit", e => {
-  e.preventDefault();
-
-  const name = document.getElementById("patientName").value.trim();
-  const treatment = document.getElementById("patientTreatment").value;
-  const date = appointmentDate.value;
-  const time = appointmentTime.value;
-  const extra = document.getElementById("patientMessage").value.trim();
-  const preferredDate = new Intl.DateTimeFormat("es-MX", { dateStyle: "full" }).format(new Date(`${date}T12:00:00`));
-
-  let message = `Hola Orthomax, soy ${name}. Me gustaría solicitar una cita.\n\nTratamiento de interés: ${treatment}.\nFecha preferida: ${preferredDate}.\nHora preferida: ${time}.\n\nEntiendo que el horario está sujeto a confirmación.`;
-  if (extra) message += `\n\nMensaje: ${extra}`;
-  message += "\n\nQuedo atento(a) a su respuesta.";
-
-  window.open(whatsappUrl(message), "_blank", "noopener,noreferrer");
-  closeModal();
-});
-
-document.querySelectorAll(".wa-treatment").forEach(link => {
-  link.addEventListener("click", e => {
-    e.preventDefault();
-    const treatment = link.dataset.treatment;
-    const message = `Hola Orthomax, me interesa recibir información sobre ${treatment}. ¿Podrían ayudarme con disponibilidad y precios?`;
-    window.open(whatsappUrl(message), "_blank", "noopener,noreferrer");
-  });
-});
-
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightboxImg");
-const lightboxClose = document.getElementById("lightboxClose");
-
-document.querySelectorAll(".gallery-item").forEach(item => {
-  item.addEventListener("click", () => {
-    lightboxImg.src = item.dataset.full;
-    lightboxImg.alt = item.querySelector("img").alt;
-    lightbox.classList.add("open");
-    lightbox.setAttribute("aria-hidden", "false");
-    document.body.classList.add("no-scroll");
-  });
-});
-
-function closeLightbox() {
-  lightbox.classList.remove("open");
-  lightbox.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("no-scroll");
-  lightboxImg.src = "";
-}
-
-lightboxClose.addEventListener("click", closeLightbox);
-lightbox.addEventListener("click", e => {
-  if (e.target === lightbox) closeLightbox();
-});
-
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    closeModal();
-    closeLightbox();
+$('lightboxClose').addEventListener('click',()=>lightbox.close());
+const navLinks=[...menu.querySelectorAll('a:not(.nav-cta)')];
+const observer=new IntersectionObserver(entries=>{
+  const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+  if(!visible) return;
+  for(const link of navLinks) {
+    const active=link.hash===`#${visible.target.id}`;
+    link.classList.toggle('active',active);
+    if(active) link.setAttribute('aria-current','location'); else link.removeAttribute('aria-current');
   }
-});
-
-// Marca automáticamente el enlace del menú correspondiente a la sección visible.
-const sections = document.querySelectorAll("main section[id]");
-const navLinks = document.querySelectorAll('.main-nav a[href^="#"]');
-
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (!entry.isIntersecting) return;
-    navLinks.forEach(link => link.classList.remove("active"));
-    const current = document.querySelector(`.main-nav a[href="#${entry.target.id}"]`);
-    if (current) current.classList.add("active");
-  });
-}, { rootMargin: "-30% 0px -60% 0px", threshold: 0 });
-
-sections.forEach(section => observer.observe(section));
+},{rootMargin:'-15% 0px -65% 0px'});
+navLinks.forEach(link=>{ const section=document.querySelector(link.hash); if(section) observer.observe(section); });

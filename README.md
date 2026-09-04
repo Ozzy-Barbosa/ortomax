@@ -15,16 +15,16 @@ Vista local: http://127.0.0.1:4173. No es necesario ejecutar `npm install`: no h
 
 `dist/` contiene la salida de cada compilación y se reemplaza al compilar. No edites esa carpeta directamente. La compilación de vista previa lleva `noindex` y bloquea el rastreo; NO se debe usar como versión pública definitiva.
 
-## Publicación cuando exista el dominio
+## Publicación cuando se autorice el lanzamiento
 
 1. Sigue `LANZAMIENTO.md` y confirma con la responsable teléfono, dirección, horarios, tratamientos, nombre comercial y privacidad.
-2. Edita `site.config.json`: `origin` debe ser el dominio real con `https://`, sin rutas, y marca las dos confirmaciones únicamente después de revisarlas.
+2. El dominio ya está configurado en `site.config.json`: `https://www.orthomaxlapaz.com`. Marca las dos confirmaciones únicamente después de revisar los datos con la responsable.
 3. Ejecuta `npm test`, `npm run check` y `npm run build`.
 4. Ejecuta `node tools/check.mjs --dist`.
 5. Sube **solo el contenido de `dist/`**, incluyendo `.htaccess` si usas Apache. No subas la carpeta del proyecto, `.git`, pruebas o herramientas.
 6. Activa certificado HTTPS y la redirección al dominio canónico en el panel del proveedor. Comprueba la web publicada siguiendo la guía.
 
-El build de producción genera las URLs canónicas, Open Graph, tarjeta de redes con una fotografía real existente, sitemap, robots indexable, datos estructurados Dentist y políticas de seguridad. Se detiene si falta el dominio o las confirmaciones. No inventa una dirección web.
+El build de producción genera las URLs canónicas, Open Graph, tarjeta de redes con una fotografía real existente, sitemap, robots indexable, datos estructurados Dentist y políticas de seguridad. Se detiene si falta el dominio o las confirmaciones. El dominio comprado en GoDaddy ya está definido; todavía no se ha publicado ni cambiado DNS. Consulta `AUDITORIA-SEO.md` para los hallazgos y las acciones posteriores al lanzamiento.
 
 ## Qué hace el sitio
 

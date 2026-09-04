@@ -2,7 +2,8 @@
 
 ## Lo que falta aportar o confirmar
 
-- [ ] Dominio definitivo y acceso al proveedor de hosting/DNS.
+- [x] Dominio definitivo comprado en GoDaddy: **www.orthomaxlapaz.com**. Origen canónico: `https://www.orthomaxlapaz.com`.
+- [ ] Elegir/confirmar hosting y acceso a DNS. La compra del dominio no identifica el hosting. **No publicar hasta nueva instrucción del cliente.**
 - [ ] Confirmar nombre comercial: el proyecto existente usa **Orthomax Centro Odontológico**.
 - [ ] Confirmar que **612 142 9561** es el teléfono y recibe WhatsApp.
 - [x] Ubicación del mapa proporcionada por el cliente: ficha de Orthomax Centro de Especialidades Odontológicas en las coordenadas 24.153191, -110.314859. El botón de indicaciones usa estas coordenadas para evitar depender de datos antiguos de directorios.
@@ -30,7 +31,7 @@ Exportar fotografías a WebP o JPEG de buena calidad, preferentemente 100–250 
 
 El proveedor debe servir archivos estáticos, permitir HTTPS y una página 404 real. En Apache/cPanel, subir el contenido de `dist/` a la raíz pública del sitio e incluir `.htaccess`. En un hosting compatible con `_headers`, usar ese archivo; en otros, trasladar sus políticas al panel. En Nginx se configura `try_files $uri $uri/ =404;` y `error_page 404 /404.html;` con el administrador. No redirigir todas las rutas inexistentes a la portada.
 
-Configurar los registros DNS exactos indicados por el proveedor. Elegir dominio con o sin `www`; `origin` debe coincidir con esa elección. Activar certificado y redirigir HTTP y la variante secundaria hacia la principal con 301 o 308. No se incluyó una redirección Apache ciega porque puede producir bucles detrás de un proxy.
+Configurar los registros DNS exactos indicados por el proveedor. La variante elegida es **www**; `origin` ya coincide con esa elección. Activar certificado y redirigir HTTP y la variante secundaria hacia la principal con 301 o 308. El build de producción añade en Apache la redirección del dominio sin www al canónico, y normaliza `/index.html` hacia `/`. La redirección de HTTP a HTTPS se debe activar en el panel del hosting según su arquitectura; no se utiliza una condición HTTPS ciega que pueda generar bucles detrás de un proxy. Si el hosting no usa Apache, configurar ambas redirecciones en su panel.
 
 No subir `site.config.json`, herramientas, pruebas, README, archivos de Git ni esta lista. El build selecciona únicamente recursos públicos. Mantener una copia de la versión anterior para volver atrás si falla una actualización.
 
@@ -50,4 +51,4 @@ No subir `site.config.json`, herramientas, pruebas, README, archivos de Git ni e
 
 ## Comprobaciones realizadas en desarrollo
 
-Pruebas automáticas de la zona horaria de La Paz, días cerrados, horarios pasados, sábados y codificación de WhatsApp. Verificación de anclas, archivos locales, fuentes y JSON-LD. Compilación de vista previa sin dominio. La indexación, DNS, TLS, entrega de mensajes y comportamiento del proveedor solo se pueden confirmar después de disponer del dominio/hosting reales.
+Pruebas automáticas de la zona horaria de La Paz, días cerrados, horarios pasados, sábados y codificación de WhatsApp. Verificación de anclas, archivos locales, fuentes y JSON-LD. Compilación de vista previa no indexable y prueba de producción aislada con el dominio real. La indexación, DNS, TLS, entrega de mensajes y comportamiento del proveedor solo se pueden confirmar después de disponer del dominio/hosting reales.

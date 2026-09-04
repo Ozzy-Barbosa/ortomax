@@ -8,7 +8,7 @@ let origin = originArg?.slice(9) || config.origin;
 if (!preview) {
   let url;
   try { url = new URL(origin); } catch { throw Error('Configura origin en site.config.json con el dominio HTTPS real. Para revisar usa npm run build -- --preview.'); }
-  if (url.protocol !== 'https:' || url.pathname !== '/' || url.search || url.hash || url.username || url.password || !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname) || /(^|\.)(example\.(com|org|net)|localhost|test|invalid)$/.test(url.hostname)) throw Error('El dominio debe ser un origen HTTPS público, sin ruta ni credenciales.');
+  if (url.protocol !== 'https:' || url.port || url.pathname !== '/' || url.search || url.hash || url.username || url.password || !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname) || /(^|\.)(example\.(com|org|net)|localhost|test|invalid)$/.test(url.hostname)) throw Error('El dominio debe ser un origen HTTPS público, sin puerto, ruta ni credenciales.');
   origin = url.origin;
   if (!config.businessDetailsConfirmed || !config.privacyReviewed) throw Error('Confirma businessDetailsConfirmed y privacyReviewed en site.config.json después de revisar los datos y privacidad con la responsable del consultorio.');
 }
@@ -22,7 +22,7 @@ for (const file of ['styles.css','script.js','appointment.js']) await cp(file,`d
 await writeFile('dist/script.js',(await readFile('script.js','utf8')).replace("'./appointment.js'",`'./appointment.js?v=${version}'`));
 for (const file of ['index.html','privacidad.html','404.html']) {
   let html = await readFile(file,'utf8');
-  html = html.replace('href="styles.css"',`href="styles.css?v=${version}"`).replace('src="script.js"',`src="script.js?v=${version}"`);
+  html = html.replace(/href="(\/?styles\.css)"/,`href="$1?v=${version}"`).replace('src="script.js"',`src="script.js?v=${version}"`);
   if (!preview && file !== '404.html') {
     const url = origin + (file==='index.html' ? '/' : '/privacidad.html');
     html = html.replace('content="noindex, nofollow"','content="index, follow, max-image-preview:large"');
@@ -32,6 +32,20 @@ for (const file of ['index.html','privacidad.html','404.html']) {
       metadata += `<meta property="og:image" content="${image}"><meta property="og:image:width" content="1600"><meta property="og:image:height" content="900"><meta property="og:image:alt" content="Consultorio de Orthomax en La Paz"><meta name="twitter:title" content="Orthomax | Dentista en La Paz"><meta name="twitter:description" content="Ortodoncia y atención dental con un trato cercano. Solicita tu cita en La Paz, B.C.S."><meta name="twitter:image" content="${image}">`;
       html = html.replace(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/,(_,json)=>{
         const data=JSON.parse(json); data.url=url; data['@id']=`${origin}/#consultorio`; data.image=image;
+        data.logo = `${origin}/assets/ortomax-simbolo.png`;
+        data.mainEntityOfPage = {
+          '@type':'WebPage', '@id':`${url}#pagina`, url,
+          name:html.match(/<title>(.*?)<\/title>/)[1], inLanguage:'es-MX',
+          isPartOf:{'@type':'WebSite','@id':`${origin}/#sitio`,url:origin+'/',name:'Orthomax',alternateName:'Orthomax La Paz',inLanguage:'es-MX'}
+        };
+        // Derive services from visible cards so structured data cannot drift from the page.
+        data.hasOfferCatalog = {
+          '@type':'OfferCatalog', name:'Tratamientos dentales en Orthomax',
+          itemListElement:[...html.matchAll(/<article class="treatment-card" id="([^"]+)">([\s\S]*?)<\/article>/g)].map(([,id,card])=>({
+            '@type':'Offer',itemOffered:{'@type':'Service',name:card.match(/<h3>(.*?)<\/h3>/)[1],
+              url:`${url}#${id}`, areaServed:'La Paz, Baja California Sur',provider:{'@id':data['@id']}}
+          }))
+        };
         return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
       });
     }
@@ -45,7 +59,12 @@ const builtHome=await readFile('dist/index.html','utf8');
 const schema=builtHome.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
 const schemaHash=createHash('sha256').update(schema).digest('base64');
 for (const file of ['.htaccess','_headers']) {
-  const headers=(await readFile(`hosting/${file}`,'utf8')).replace("script-src 'self'",`script-src 'self' 'sha256-${schemaHash}'`);
+  let headers=(await readFile(`hosting/${file}`,'utf8')).replace("script-src 'self'",`script-src 'self' 'sha256-${schemaHash}'`);
+  if (!preview && file === '.htaccess') {
+    const host = new URL(origin).hostname;
+    const secondary = host.startsWith('www.') ? host.slice(4) : `www.${host}`;
+    headers += `\n# Canonical host only; enforce HTTPS in the hosting panel.\n<IfModule mod_rewrite.c>\n  RewriteEngine On\n  RewriteCond %{HTTP_HOST} ^${secondary.replaceAll('.', '\\.')}(:[0-9]+)?$ [NC]\n  RewriteRule ^ ${origin}%{REQUEST_URI} [R=301,L,NE]\n</IfModule>\n`;
+  }
   await writeFile(`dist/${file}`,headers);
 }
 console.log(preview?'Vista previa generada en dist/ (noindex).':'Producción generada en dist/ para '+origin);

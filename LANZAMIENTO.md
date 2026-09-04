@@ -3,15 +3,15 @@
 ## Lo que falta aportar o confirmar
 
 - [x] Dominio definitivo comprado en GoDaddy: **www.orthomaxlapaz.com**. Origen canónico: `https://www.orthomaxlapaz.com`.
-- [ ] Elegir/confirmar hosting y acceso a DNS. La compra del dominio no identifica el hosting. **No publicar hasta nueva instrucción del cliente.**
+- [ ] Elegir/confirmar hosting y acceso a DNS. La compra del dominio no identifica el hosting. **Publicación autorizada el 3 de septiembre de 2026. Hosting elegido: GitHub Pages, igual que Altum.**
 - [ ] Confirmar nombre comercial: el proyecto existente usa **Orthomax Centro Odontológico**.
-- [ ] Confirmar que **612 142 9561** es el teléfono y recibe WhatsApp.
+- [x] Confirmado por el cliente: **612 142 9561** es el teléfono y recibe WhatsApp.
 - [x] Ubicación del mapa proporcionada por el cliente: ficha de Orthomax Centro de Especialidades Odontológicas en las coordenadas 24.153191, -110.314859. El botón de indicaciones usa estas coordenadas para evitar depender de datos antiguos de directorios.
-- [ ] Confirmar el texto postal que se mostrará junto al mapa: Antonio Rosales 555, entre Altamirano y Ramírez, Lic. Benito Juárez, 23000, La Paz, B.C.S.
-- [ ] Confirmar horario: lunes a viernes 9–19 h, sábado 9–14 h. El sitio no conoce vacaciones ni días festivos; por eso toda solicitud requiere confirmación humana.
+- [x] Confirmado por el cliente el texto postal que se mostrará junto al mapa: Antonio Rosales 555, entre Altamirano y Ramírez, Lic. Benito Juárez, 23000, La Paz, B.C.S.
+- [x] Horario confirmado por el cliente: lunes a viernes 9–19 h, sábado 9–14 h. El sitio no conoce vacaciones ni días festivos; por eso toda solicitud requiere confirmación humana.
 - [ ] Confirmar servicios ofrecidos. Se conservaron ortodoncia convencional y estética, ortopedia maxilar, blanqueamiento y retenedores. Se eliminaron de los metadatos implantes y endodoncia porque no estaban respaldados por el contenido del sitio.
 - [ ] Proporcionar nombre completo de la dentista, formación y cédulas que deba mostrar el sitio. No se inventaron datos profesionales, certificaciones, años de experiencia, precios ni reseñas.
-- [ ] Validar contenido de privacidad con la responsable: identidad legal, domicilio, contacto para derechos sobre datos, finalidad y procedimiento, y aviso integral del consultorio. `privacidad.html` explica el funcionamiento implementado; no sustituye por sí sola esa revisión.
+- [x] El cliente confirmó la revisión de privacidad antes de publicar: identidad legal, domicilio, contacto para derechos sobre datos, finalidad y procedimiento, y aviso integral del consultorio. `privacidad.html` explica el funcionamiento implementado; no sustituye por sí sola esa revisión.
 - [ ] Confirmar autorización de uso de todas las fotografías y derechos de las personas reconocibles. Añadir enlaces oficiales de redes sociales solo cuando se tengan; se retiraron los enlaces genéricos.
 
 ## Fotografías reales recomendadas

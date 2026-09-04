@@ -46,6 +46,14 @@ test('production requires confirmed configuration and generates coherent SEO out
     assert.ok(headers.includes(`sha256-${createHash('sha256').update(json).digest('base64')}`));
     assert.ok((await readFile(join(work,'dist/.htaccess'),'utf8')).includes(`${actual.origin}%{REQUEST_URI}`));
     assert.ok((await readFile(join(work,'dist/sitemap.xml'),'utf8')).includes(`<loc>${actual.origin}/</loc>`));
+    const pages=spawnSync(process.execPath,['tools/build.mjs','--pages'],{cwd:work,encoding:'utf8'});
+    assert.equal(pages.status,0,pages.stderr);
+    const pagesHtml=await readFile(join(work,'dist/index.html'),'utf8');
+    assert.match(pagesHtml,/http-equiv="Content-Security-Policy"/);
+    assert.ok(!pagesHtml.includes('frame-ancestors'));
+    assert.ok(pagesHtml.includes(`sha256-${createHash('sha256').update(json).digest('base64')}`));
+    assert.equal(await readFile(join(work,'dist/.nojekyll'),'utf8'),'');
+    assert.equal(spawnSync(process.execPath,['tools/check.mjs','--dist'],{cwd:work,encoding:'utf8'}).status,0);
     const preview=spawnSync(process.execPath,['tools/build.mjs','--preview'],{cwd:work,encoding:'utf8'});
     assert.equal(preview.status,0,preview.stderr);
     assert.match(await readFile(join(work,'dist/index.html'),'utf8'),/noindex, nofollow/);

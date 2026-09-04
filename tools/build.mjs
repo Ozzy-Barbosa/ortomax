@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { resolve, dirname } from 'node:path';
 const config = JSON.parse(await readFile('site.config.json','utf8'));
 const preview = process.argv.includes('--preview');
+const pages = process.argv.includes('--pages');
 const originArg = process.argv.find(a=>a.startsWith('--origin='));
 let origin = originArg?.slice(9) || config.origin;
 if (!preview) {
@@ -66,5 +67,16 @@ for (const file of ['.htaccess','_headers']) {
     headers += `\n# Canonical host only; enforce HTTPS in the hosting panel.\n<IfModule mod_rewrite.c>\n  RewriteEngine On\n  RewriteCond %{HTTP_HOST} ^${secondary.replaceAll('.', '\\.')}(:[0-9]+)?$ [NC]\n  RewriteRule ^ ${origin}%{REQUEST_URI} [R=301,L,NE]\n</IfModule>\n`;
   }
   await writeFile(`dist/${file}`,headers);
+}
+if (pages) {
+  // GitHub Pages ignores custom response headers; deliver the supported CSP via HTML.
+  const policy = (await readFile('dist/_headers','utf8')).match(/Content-Security-Policy: ([^\n]+)/)[1].trim().replace(/; frame-ancestors 'none'/,'');
+  for (const file of ['index.html','privacidad.html','404.html']) {
+    const html=await readFile(`dist/${file}`,'utf8');
+    await writeFile(`dist/${file}`,html.replace(/(<meta charset="[^"]+">)/i,`$1<meta http-equiv="Content-Security-Policy" content="${policy}"><meta name="referrer" content="strict-origin-when-cross-origin">`));
+  }
+  await writeFile('dist/.nojekyll','');
+  await rm('dist/.htaccess');
+  await rm('dist/_headers');
 }
 console.log(preview?'Vista previa generada en dist/ (noindex).':'Producción generada en dist/ para '+origin);

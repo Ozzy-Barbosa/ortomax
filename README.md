@@ -46,3 +46,9 @@ El build de producción genera las URLs canónicas, Open Graph, tarjeta de redes
 - `tools/vendor.mjs`: descarga opcional de fuentes originales y Font Awesome. Los archivos ya están incluidos; no se usa al compilar ni en producción.
 
 Tras modificar horarios, actualiza tanto la interfaz, FAQ si corresponde y JSON-LD de `index.html` como las reglas de `appointment.js` y sus pruebas. Tras añadir servicios, sincroniza tarjetas, formulario y metadatos. Conserva siempre los originales de las fotografías fuera de la carpeta pública.
+
+## GitHub Pages
+
+Publicación autorizada el 3 de septiembre de 2026 para `https://www.orthomaxlapaz.com`. El workflow **Publicar Orthomax** se ejecuta manualmente desde GitHub Actions; valida y publica solo `dist/`, nunca los documentos ni herramientas del proyecto. Usa `npm run build -- --pages` para generar esa versión.
+
+GitHub Pages gestiona HTTPS y el dominio alternativo; no interpreta `.htaccess` ni `_headers`. El build de Pages incluye la política CSP compatible en el HTML. Las cabeceras que requieren soporte del servidor (por ejemplo `frame-ancestors`, Permissions-Policy y caché personalizada) no se aplican en Pages. La URL `/index.html` conserva canonical hacia `/`; Pages no ofrece la redirección Apache de esa ruta.

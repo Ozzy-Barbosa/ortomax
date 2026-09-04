@@ -12,7 +12,13 @@ export function allowedHours(date, now = new Date()) {
   const closing = parsed.getUTCDay() === 6 ? 14 : 19;
   return Array.from({length:closing-9},(_,i)=>i+9).filter(hour => date !== current.date || hour*60 > current.minutes);
 }
-export function appointmentMessage(name,treatment,date,hour) {
+export function nextAppointmentDate(now = new Date()) {
+  const day = new Date(`${clinicNow(now).date}T12:00:00Z`);
+  while (!allowedHours(day.toISOString().slice(0,10),now).length) day.setUTCDate(day.getUTCDate()+1);
+  return day.toISOString().slice(0,10);
+}
+export function appointmentMessage(name,treatment,date,hour,comments = '') {
   const pretty = new Intl.DateTimeFormat('es-MX',{dateStyle:'full',timeZone:'UTC'}).format(new Date(`${date}T12:00:00Z`));
-  return `Hola Orthomax, soy ${name.trim()}. Me gustaría solicitar una cita.\n\nTratamiento de interés: ${treatment}.\nFecha preferida: ${pretty}.\nHora preferida: ${hour}.\n\nEntiendo que la cita está sujeta a confirmación. Quedo atento(a) a su respuesta.`;
+  const note = comments.trim().slice(0,400);
+  return `Hola Orthomax, soy ${name.trim()}. Me gustaría solicitar una cita.\n\nTratamiento de interés: ${treatment}.\nFecha preferida: ${pretty}.\nHora preferida: ${hour}.${note ? `\n\nComentarios: ${note}` : ''}\n\nEntiendo que la cita está sujeta a confirmación. Quedo atento(a) a su respuesta.`;
 }

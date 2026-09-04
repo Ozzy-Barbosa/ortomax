@@ -1,4 +1,4 @@
-import { whatsappUrl, clinicNow, allowedHours, appointmentMessage } from './appointment.js';
+import { whatsappUrl, clinicNow, allowedHours, appointmentMessage, nextAppointmentDate } from './appointment.js';
 document.documentElement.classList.add('js');
 const $ = id => document.getElementById(id);
 const menu = $('mainNav');
@@ -22,6 +22,9 @@ options.forEach((option,index)=>option.dataset.hour=index+9);
 function updateAvailability() {
   date.min=clinicNow().date;
   const available=allowedHours(date.value);
+  time.disabled=!available.length;
+  time.options[0].textContent = !date.value ? 'Elige primero una fecha' : !available.length ? 'Sin horarios para esta fecha' : 'Selecciona una hora';
+  $('appointmentHoursHelp').textContent = !date.value ? 'Selecciona una fecha para consultar las horas.' : !available.length ? 'Elige otro día: no hay horas para solicitar en esta fecha.' : 'Horas para solicitar en la fecha elegida. Tu cita requiere confirmación.';
   options.forEach(option=>{ option.disabled=!available.includes(Number(option.dataset.hour)); option.hidden=option.disabled; });
   if(time.selectedOptions[0]?.disabled) time.value='';
   date.setCustomValidity(date.value && !available.length ? 'Elige una fecha de lunes a sábado con horarios disponibles. Los horarios de hoy que ya pasaron no están disponibles.' : '');
@@ -30,6 +33,7 @@ date.addEventListener('change',()=>{ time.value=''; updateAvailability(); });
 name.addEventListener('input',()=>name.setCustomValidity(name.value.trim() ? '' : 'Escribe tu nombre.'));
 function openAppointment(event) {
   event.preventDefault();
+  if (!date.value || !allowedHours(date.value).length) date.value=nextAppointmentDate();
   updateAvailability();
   modal.showModal();
   document.body.classList.add('no-scroll');
@@ -50,7 +54,7 @@ $('appointmentForm').addEventListener('submit',event=>{
   updateAvailability();
   name.setCustomValidity(name.value.trim() ? '' : 'Escribe tu nombre.');
   if(!event.currentTarget.reportValidity()) return;
-  const message=appointmentMessage(name.value,$('patientTreatment').value,date.value,time.value);
+  const message=appointmentMessage(name.value,$('patientTreatment').value,date.value,time.value,$('appointmentComments').value);
   // Same-tab navigation avoids popup blockers and retains Back navigation.
   window.location.assign(whatsappUrl(message));
 });

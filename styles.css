@@ -409,3 +409,8 @@ input,select { font-size:16px; min-height:46px; }
   .service-card h3 { font-size:12px; }
   .hero .eyebrow { font-size:9px; letter-spacing:1.2px; }
 }
+
+.hours-help,.comments-help { font-size:12px; line-height:1.55; color:#526970; margin:0; }
+.optional-label { font-weight:400; color:#526970; }
+#appointmentComments { resize:vertical; min-height:88px; font-size:16px; line-height:1.5; }
+#appointmentTime:disabled { background:#edf3f4; color:#526970; cursor:not-allowed; }

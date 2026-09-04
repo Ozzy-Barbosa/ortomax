@@ -361,7 +361,7 @@
               <input type="date" id="appointmentDate" required>
             </label>
             <label>Hora preferida
-              <select id="appointmentTime" required>
+              <select id="appointmentTime" required aria-describedby="appointmentHoursHelp">
                 <option value="" selected disabled>Selecciona</option>
                 <option>9:00 am</option><option>10:00 am</option><option>11:00 am</option>
                 <option>12:00 pm</option><option>1:00 pm</option><option>2:00 pm</option>
@@ -369,6 +369,11 @@
               </select>
             </label>
           </div>
+          <p class="hours-help" id="appointmentHoursHelp" role="status">Selecciona una fecha para consultar las horas.</p>
+          <label for="appointmentComments">Comentarios <span class="optional-label">(opcional)</span>
+            <textarea id="appointmentComments" name="comments" rows="3" maxlength="400" aria-describedby="appointmentCommentsHelp" placeholder="Por ejemplo: prefiero una cita por la mañana o quisiera consultar el costo."></textarea>
+          </label>
+          <p class="comments-help" id="appointmentCommentsHelp">Máximo 400 caracteres. Evita incluir información clínica o datos sensibles.</p>
           <p class="availability-note"><i class="fa-regular fa-clock" aria-hidden="true"></i> Horario sujeto a confirmación. Atención: lun–vie 9:00 am–7:00 pm y sáb 9:00 am–2:00 pm.</p>
 <p class="form-privacy">Al continuar se abrirá WhatsApp con tu nombre y preferencias de cita. Tú decides cuándo enviar el mensaje. Evita compartir información clínica por este medio. <a href="privacidad.html">Información de privacidad</a>.</p>
           <button class="btn btn-primary full" type="submit"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> CONTINUAR EN WHATSAPP</button>

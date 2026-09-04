@@ -2,6 +2,8 @@
 
 Fecha: 3 de septiembre de 2026. Dominio principal: **https://www.orthomaxlapaz.com**. Dominio comprado en GoDaddy; hosting por confirmar. No se ha publicado, cambiado DNS ni enviado mensajes a pacientes.
 
+> Actualización de lanzamiento: el cliente confirmó datos y privacidad y autorizó publicar el 3 de septiembre de 2026. GitHub Pages desplegó la versión de producción; www apunta a ozzy-barbosa.github.io y el dominio raíz a 185.199.108.153. La auditoría siguiente conserva el estado previo al lanzamiento.
+
 ## Cambios implementados
 
 - Dominio incorporado en la configuración del build. Producción genera canonical, Open Graph, tarjeta social, robots y sitemap con ese origen. La vista previa permanece no indexable.

@@ -43,6 +43,8 @@ El build de producción genera las URLs canónicas, Open Graph, tarjeta de redes
 - `privacidad.html`: explicación del sitio, pendiente de validar/complementar con el aviso integral de la responsable.
 - `assets/ortomax/`: imágenes existentes. Requisitos y futuras fotografías en `LANZAMIENTO.md`.
 - `hosting/`: cabeceras para Apache y hosting estático compatible con `_headers`. La redirección HTTPS depende del proveedor.
+- `assets/tarjeta-digital-orthomax.png`: tarjeta horizontal en alta resolución con datos confirmados y QR directo al sitio seguro.
+- `assets/orthomax-qr.png`: QR de alta resolución que apunta a `https://www.orthomaxlapaz.com/`.
 - `tools/vendor.mjs`: descarga opcional de fuentes originales y Font Awesome. Los archivos ya están incluidos; no se usa al compilar ni en producción.
 
 Tras modificar horarios, actualiza tanto la interfaz, FAQ si corresponde y JSON-LD de `index.html` como las reglas de `appointment.js` y sus pruebas. Tras añadir servicios, sincroniza tarjetas, formulario y metadatos. Conserva siempre los originales de las fotografías fuera de la carpeta pública.

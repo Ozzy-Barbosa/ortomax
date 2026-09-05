@@ -85,3 +85,91 @@ const observer=new IntersectionObserver(entries=>{
   }
 },{rootMargin:'-15% 0px -65% 0px'});
 navLinks.forEach(link=>{ const section=document.querySelector(link.hash); if(section) observer.observe(section); });
+
+// Progressive motion: the page stays fully readable without JavaScript and
+// respects the visitor's reduced-motion preference.
+const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+const motionTargets=[...document.querySelectorAll([
+  '.section-intro > *', '.why-copy > *', '.center-heading > *',
+  '.visit-heading > *', '.faq-layout > *', '.location-heading > *',
+  '.service-card', '.benefit', '.treatment-card', '.visit-steps li',
+  '.gallery-item', '.faq-list details', '.location-panel > *'
+].join(','))];
+
+function prepareMotion() {
+  const staggerGroups=document.querySelectorAll('.service-grid,.benefits,.treatment-grid,.visit-steps,.gallery-grid,.faq-list');
+  staggerGroups.forEach(group=>{
+    [...group.children].forEach((item,index)=>item.style.setProperty('--reveal-delay',`${Math.min(index*75,300)}ms`));
+  });
+
+  if(reducedMotion.matches || !('IntersectionObserver' in window)) {
+    motionTargets.forEach(target=>target.classList.add('is-visible'));
+    return;
+  }
+
+  document.documentElement.classList.add('motion-ready');
+  motionTargets.forEach(target=>target.classList.add('reveal'));
+  const revealObserver=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      revealObserver.unobserve(entry.target);
+    });
+  },{threshold:.12,rootMargin:'0px 0px -8% 0px'});
+  motionTargets.forEach(target=>revealObserver.observe(target));
+}
+
+prepareMotion();
+requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelector('.hero')?.classList.add('is-ready')));
+
+// A slim reading-progress line and a little more depth for the sticky header.
+const header=document.querySelector('.site-header');
+const progress=document.createElement('span');
+progress.className='site-progress';
+progress.setAttribute('aria-hidden','true');
+header.append(progress);
+let scrollFrame=0;
+function updateScrollUi() {
+  scrollFrame=0;
+  const max=document.documentElement.scrollHeight-innerHeight;
+  const ratio=max>0 ? Math.min(scrollY/max,1) : 0;
+  progress.style.transform=`scaleX(${ratio})`;
+  header.classList.toggle('is-scrolled',scrollY>18);
+}
+addEventListener('scroll',()=>{
+  if(!scrollFrame) scrollFrame=requestAnimationFrame(updateScrollUi);
+},{passive:true});
+updateScrollUi();
+
+// Pointer-aware light and parallax effects are intentionally subtle and are
+// only enabled on precise pointing devices.
+const precisePointer=matchMedia('(pointer:fine)');
+const heroPhoto=document.querySelector('.hero-photo');
+if(!reducedMotion.matches && precisePointer.matches && heroPhoto) {
+  heroPhoto.addEventListener('pointermove',event=>{
+    const box=heroPhoto.getBoundingClientRect();
+    heroPhoto.style.setProperty('--media-x',`${((event.clientX-box.left)/box.width-.5)*10}px`);
+    heroPhoto.style.setProperty('--media-y',`${((event.clientY-box.top)/box.height-.5)*10}px`);
+  });
+  heroPhoto.addEventListener('pointerleave',()=>{
+    heroPhoto.style.setProperty('--media-x','0px');
+    heroPhoto.style.setProperty('--media-y','0px');
+  });
+}
+
+document.querySelectorAll('.service-card,.treatment-card,.visit-steps li').forEach(card=>{
+  card.classList.add('interactive-surface');
+  if(reducedMotion.matches || !precisePointer.matches) return;
+  card.addEventListener('pointermove',event=>{
+    const box=card.getBoundingClientRect();
+    card.style.setProperty('--glow-x',`${event.clientX-box.left}px`);
+    card.style.setProperty('--glow-y',`${event.clientY-box.top}px`);
+  });
+});
+
+// Keep the questions compact while making each answer feel responsive.
+const questions=[...document.querySelectorAll('.faq-list details')];
+questions.forEach(question=>question.addEventListener('toggle',()=>{
+  if(!question.open) return;
+  questions.forEach(other=>{ if(other!==question) other.open=false; });
+}));

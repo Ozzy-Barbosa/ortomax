@@ -34,7 +34,28 @@ test('production requires confirmed configuration and generates coherent SEO out
     assert.equal(webpage.mainEntity['@id'],schema['@id']);
     assert.equal(schema.mainEntityOfPage['@id'],webpage['@id']);
     assert.equal(webpage.isPartOf['@id'],website['@id']);
-    assert.ok(html.includes(`<meta name="twitter:title" content="${webpage.name}">`));
+    const meta=name=>html.match(new RegExp(`<meta (?:property|name)="${name}" content="([^"]+)"`))?.[1];
+    assert.equal(meta('twitter:title'),meta('og:title'));
+    assert.equal(meta('twitter:description'),meta('og:description'));
+    assert.match(meta('og:title'),/Orthomax La Paz/);
+    assert.equal(meta('og:image:secure_url'),meta('og:image'));
+    assert.equal(meta('og:image:type'),'image/jpeg');
+    assert.equal(meta('og:image:width'),'800');
+    assert.equal(meta('og:image:height'),'800');
+    assert.ok(meta('og:image:alt'));
+    assert.ok(meta('twitter:image:alt'));
+    assert.notEqual(meta('og:image'),meta('twitter:image'));
+    // Each crawler receives a public, versioned file containing the approved artwork.
+    for (const [property,source] of [['og:image','orthomax-enlace'],['twitter:image','orthomax-social']]) {
+      const imageUrl=new URL(meta(property));
+      assert.equal(imageUrl.origin,'https://clinic.fixture.mx');
+      const original=await readFile(join(work,`assets/${source}.jpg`));
+      const fingerprint=createHash('sha256').update(original).digest('hex').slice(0,12);
+      assert.equal(imageUrl.pathname,`/assets/${source}-${fingerprint}.jpg`);
+      assert.deepEqual(await readFile(join(work,'dist',imageUrl.pathname.slice(1))),original);
+    }
+    assert.equal(webpage.primaryImageOfPage.url,schema.image);
+    assert.notEqual(schema.image,meta('og:image'));
     for (const offer of schema.hasOfferCatalog.itemListElement) {
       const service=offer.itemOffered;
       assert.ok(html.includes(`id="${new URL(service.url).hash.slice(1)}"`));

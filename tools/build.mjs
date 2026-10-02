@@ -18,8 +18,17 @@ if (dirname(output) !== process.cwd() || (await lstat(output).catch(()=>null))?.
 await rm(output,{recursive:true,force:true});
 await mkdir(output,{recursive:true});
 await cp('assets','dist/assets',{recursive:true});
+// A new filename on each image revision avoids reusing an older cached image.
+async function shareImage(name) {
+  const bytes=await readFile(`assets/${name}.jpg`);
+  const hash=createHash('sha256').update(bytes).digest('hex').slice(0,12);
+  const path=`assets/${name}-${hash}.jpg`;
+  await writeFile(`dist/${path}`,bytes);
+  return path;
+}
+const shareSquare=await shareImage('orthomax-enlace');
+const shareWide=await shareImage('orthomax-social');
 const version = createHash('sha256').update(await readFile('styles.css')).update(await readFile('script.js')).update(await readFile('appointment.js')).digest('hex').slice(0,12);
-const escapeAttribute=value=>value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const plainText=value=>value.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 for (const file of ['styles.css','script.js','appointment.js']) await cp(file,`dist/${file}`);
 await writeFile('dist/script.js',(await readFile('script.js','utf8')).replace("'./appointment.js'",`'./appointment.js?v=${version}'`));
@@ -34,7 +43,11 @@ for (const file of ['index.html','privacidad.html','404.html']) {
       const image = `${origin}/assets/ortomax/consultorio-dental-ortomax.jpeg`;
       const title=html.match(/<title>(.*?)<\/title>/)[1];
       const description=html.match(/<meta name="description"\s+content="([^"]+)"/)[1];
-      metadata += `<meta property="og:image" content="${image}"><meta property="og:image:width" content="1600"><meta property="og:image:height" content="900"><meta property="og:image:alt" content="Consultorio de Orthomax en La Paz"><meta name="twitter:title" content="${escapeAttribute(title)}"><meta name="twitter:description" content="${escapeAttribute(description)}"><meta name="twitter:image" content="${image}"><meta name="twitter:image:alt" content="Consultorio de Orthomax en La Paz">`;
+      // Share copy is separate from the search title and the real clinic photo in JSON-LD.
+      const shareTitle=html.match(/<meta property="og:title" content="([^"]+)"/)[1];
+      const shareDescription=html.match(/<meta property="og:description" content="([^"]+)"/)[1];
+      const squareUrl=`${origin}/${shareSquare}`;
+      metadata += `<meta property="og:image" content="${squareUrl}"><meta property="og:image:secure_url" content="${squareUrl}"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="800"><meta property="og:image:height" content="800"><meta property="og:image:alt" content="Logotipo de Orthomax Centro Odontológico, La Paz, B.C.S."><meta name="twitter:title" content="${shareTitle}"><meta name="twitter:description" content="${shareDescription}"><meta name="twitter:image" content="${origin}/${shareWide}"><meta name="twitter:image:alt" content="Orthomax: Que tu sonrisa hable de ti. Fachada y recepción del consultorio en La Paz, B.C.S.">`;
       // A top-level WebSite node gives the brand its own identity in search.
       const website={
         '@type':'WebSite','@id':`${origin}/#sitio`,url:origin+'/',name:'Orthomax La Paz',

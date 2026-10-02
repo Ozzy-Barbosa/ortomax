@@ -24,7 +24,7 @@ Vista local: http://127.0.0.1:4173. No es necesario ejecutar `npm install`: no h
 5. Sube **solo el contenido de `dist/`**, incluyendo `.htaccess` si usas Apache. No subas la carpeta del proyecto, `.git`, pruebas o herramientas.
 6. Activa certificado HTTPS y la redirección al dominio canónico en el panel del proveedor. Comprueba la web publicada siguiendo la guía.
 
-El build de producción genera las URLs canónicas, Open Graph, tarjeta de redes con una fotografía real existente, sitemap, robots indexable, datos estructurados Dentist, WebSite y WebPage y políticas de seguridad. Se detiene si falta el dominio o las confirmaciones. El sitio está publicado en GitHub Pages con HTTPS y el dominio comprado en GoDaddy. Consulta `AUDITORIA-SEO.md` para los hallazgos y las acciones posteriores al lanzamiento.
+El build de producción genera las URLs canónicas, Open Graph, tarjetas de redes con la identidad de Orthomax, sitemap, robots indexable, datos estructurados Dentist, WebSite y WebPage y políticas de seguridad. Se detiene si falta el dominio o las confirmaciones. El sitio está publicado en GitHub Pages con HTTPS y el dominio comprado en GoDaddy. Consulta `AUDITORIA-SEO.md` para los hallazgos y las acciones posteriores al lanzamiento.
 
 ## Qué hace el sitio
 
@@ -47,7 +47,12 @@ El build de producción genera las URLs canónicas, Open Graph, tarjeta de redes
 - `hosting/`: cabeceras para Apache y hosting estático compatible con `_headers`. La redirección HTTPS depende del proveedor.
 - `assets/tarjeta-digital-orthomax.png`: tarjeta horizontal en alta resolución con datos confirmados y QR directo al sitio seguro.
 - `assets/orthomax-qr.png`: QR de alta resolución que apunta a `https://www.orthomaxlapaz.com/`.
+- `assets/orthomax-enlace.jpg`: imagen cuadrada de 800 × 800 para Open Graph; prioriza el logotipo y la ubicación en miniaturas.
+- `assets/orthomax-social.jpg`: tarjeta horizontal de 1200 × 630 para Twitter/X, con el logotipo y fotografías reales de fachada y recepción.
+- `tools/social-preview.html`: composición editable de ambas imágenes. Abre este archivo directamente en un navegador, espera a que carguen las fuentes locales y exporta los elementos `#shareSquare` y `#shareWide` a tamaño natural, sin escalado. Las imágenes finales están incluidas y no necesitan regenerarse durante la publicación.
 - `tools/vendor.mjs`: descarga opcional de fuentes originales y Font Awesome. Los archivos ya están incluidos; no se usa al compilar ni en producción.
+
+El título y la descripción para compartir se editan en las etiquetas `og:title` y `og:description` de `index.html`; el título y la descripción de búsqueda se mantienen independientes. El build añade al nombre público de cada imagen una huella de su contenido para renovar su URL cuando cambia el diseño. Las plataformas pueden conservar la vista previa del enlace en su propia caché y los mensajes ya enviados pueden seguir mostrando la imagen anterior. La fotografía del consultorio se conserva en los datos estructurados del negocio.
 
 Tras modificar horarios, actualiza tanto la interfaz, FAQ si corresponde y JSON-LD de `index.html` como las reglas de `appointment.js` y sus pruebas. Tras añadir servicios, sincroniza tarjetas, formulario y metadatos. Conserva siempre los originales de las fotografías fuera de la carpeta pública.
 

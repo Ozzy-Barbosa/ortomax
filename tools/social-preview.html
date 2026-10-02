@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diseño de las tarjetas de enlace de Orthomax</title>
+  <link rel="stylesheet" href="../assets/vendor/fonts.css">
+  <style>
+    * { box-sizing:border-box; }
+    html,body { margin:0; padding:0; }
+    body { background:#e5ece6; font-family:'Montserrat',sans-serif; color:#153e47; }
+    .card { overflow:hidden; position:relative; isolation:isolate; background:#fffefa; }
+    .square { width:800px; height:800px; display:flex; flex-direction:column; align-items:center; }
+    .square::before { content:''; position:absolute; width:730px; height:730px; left:-520px; bottom:-500px; border:1px solid #a6cfc0; border-radius:50%; box-shadow:0 0 0 56px #e4eee5,0 0 0 110px #f1f5ec; z-index:-1; }
+    .square::after { content:''; position:absolute; width:490px; height:490px; right:-355px; top:-270px; border:1px solid #b9d9ca; border-radius:50%; box-shadow:0 0 0 45px #edf4ed; z-index:-1; }
+    .square .logo { width:326px; height:326px; object-fit:contain; margin-top:92px; }
+    .square .wordmark { margin:32px 0 0; font-size:74px; line-height:1.2; font-weight:800; letter-spacing:1px; }
+    .square .descriptor { margin-top:12px; font-size:17px; font-weight:700; letter-spacing:5px; }
+    .square .location { margin-top:44px; padding:12px 30px; background:#153e47; color:#fffefa; border-radius:100px; font-size:24px; line-height:1.4; font-weight:600; letter-spacing:2px; }
+    .square .line { width:78px; height:3px; border-radius:3px; background:#087f83; margin-top:30px; }
+    .wide { width:1200px; height:630px; background:#153e47; color:#fffefa; }
+    .wide::before { content:''; position:absolute; width:720px; height:720px; left:-490px; bottom:-575px; border:1px solid #bfe4d644; border-radius:50%; box-shadow:0 0 0 48px #bfe4d607,0 0 0 96px #bfe4d604; z-index:-1; }
+    .wide .copy { position:absolute; left:68px; top:68px; width:648px; }
+    .brand { display:flex; align-items:center; gap:21px; }
+    .brand .logo { width:101px; height:101px; object-fit:contain; }
+    .brand .wordmark { margin:0; font-size:48px; font-weight:800; line-height:1.1; letter-spacing:1px; }
+    .brand .descriptor { font-size:11px; font-weight:600; letter-spacing:3.5px; margin-top:9px; color:#bfe4d6; }
+    .wide .headline { font-size:55px; line-height:1.2; font-weight:500; letter-spacing:-2px; margin:65px 0 0; }
+    .wide .headline span { color:#bfe4d6; }
+    .wide .smile { width:260px; height:31px; display:block; margin:0 0 27px 0; }
+    .wide .smile path { fill:none; stroke:#bfe4d6; stroke-width:2; stroke-linecap:round; }
+    .wide .subline { font-size:16px; line-height:1.5; color:#d8e9e1; font-weight:500; }
+    .wide .domain { margin-top:38px; font-size:13px; letter-spacing:.4px; color:#bfe4d6; }
+    .wide .photo { position:absolute; overflow:hidden; border:8px solid #fffefa; box-shadow:0 15px 45px #00000026; }
+    .wide .photo img { width:100%; height:100%; display:block; object-fit:cover; }
+    .wide .front { width:342px; height:309px; right:32px; top:28px; border-radius:110px 18px 18px 18px; transform:rotate(5deg); }
+    .wide .front img { object-position:53% 50%; }
+    .wide .reception { width:350px; height:310px; right:57px; top:304px; border-radius:18px 18px 80px 18px; transform:rotate(-5deg); }
+    .wide .reception img { object-position:47% 55%; }
+    .wide .place { position:absolute; right:48px; top:288px; background:#bfe4d6; color:#153e47; border-radius:100px; padding:13px 22px; font-size:13px; font-weight:700; transform:rotate(3deg); }
+  </style>
+</head>
+<body>
+  <section class="card square" id="shareSquare" aria-label="Identidad de Orthomax para miniaturas de enlace">
+    <img class="logo" src="../assets/ortomax-simbolo.png" alt="Logotipo oficial de Orthomax" width="326" height="326">
+    <h1 class="wordmark">ORTHOMAX</h1>
+    <div class="descriptor">CENTRO ODONTOLÓGICO</div>
+    <div class="location">LA PAZ, B.C.S.</div>
+    <span class="line" aria-hidden="true"></span>
+  </section>
+  <section class="card wide" id="shareWide" aria-label="Tarjeta horizontal de Orthomax">
+    <div class="copy">
+      <div class="brand"><img class="logo" src="../assets/ortomax-simbolo.png" alt="" width="101" height="101"><div><div class="wordmark">ORTHOMAX</div><div class="descriptor">CENTRO ODONTOLÓGICO</div></div></div>
+      <p class="headline">Que tu sonrisa<br><span>hable de ti.</span></p>
+      <svg class="smile" viewBox="0 0 280 35" aria-hidden="true"><path d="M3 8 Q140 43 277 7"/></svg>
+      <p class="subline">Ortodoncia y cuidado dental en La Paz, B.C.S.</p>
+      <p class="domain">www.orthomaxlapaz.com</p>
+    </div>
+    <div class="photo front"><img src="../assets/ortomax/clinica-ortomax-la-paz.jpeg" alt="Entrada del consultorio Orthomax" width="1600" height="900"></div>
+    <div class="photo reception"><img src="../assets/ortomax/recepcion-ortomax-la-paz.jpeg" alt="Recepción de Orthomax" width="1600" height="900"></div>
+    <span class="place">TU SONRISA EMPIEZA AQUÍ ↗</span>
+  </section>
+</body>
+</html>

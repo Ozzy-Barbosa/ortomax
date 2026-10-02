@@ -261,7 +261,7 @@ function setQuestionOpen(question,open) {
   question.classList.add('is-animating');
   question.classList.toggle('is-closing',!open);
   const animation=question.animate([{height:`${startHeight}px`},{height:`${endHeight}px`}],{
-    duration:420,easing:'cubic-bezier(.22,1,.36,1)',fill:'both'
+    duration:700,easing:'cubic-bezier(.4,0,.2,1)',fill:'both'
   });
   questionAnimations.set(question,{animation,open});
   animation.onfinish=()=>{

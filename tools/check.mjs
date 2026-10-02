@@ -12,6 +12,11 @@ for(const page of ['index.html','privacidad.html','404.html']) {
     assert.match(tag,/\balt="[^"]*"/,`${page}: image alternative text`);
     assert.match(tag,/\bwidth="\d+"/,`${page}: image width`);
     assert.match(tag,/\bheight="\d+"/,`${page}: image height`);
+    const srcset=tag.match(/\bsrcset="([^"]+)"/);
+    if(srcset) for(const candidate of srcset[1].split(',')) {
+      const image=candidate.trim().split(/\s+/)[0];
+      if(!/^https?:/.test(image)) await access(resolve(root,image));
+    }
   }
   const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
   assert.equal(ids.length,new Set(ids).size,`${page}: duplicate ids`);

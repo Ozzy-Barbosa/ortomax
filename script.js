@@ -63,18 +63,35 @@ document.querySelectorAll('.wa-treatment').forEach(link=>{
   link.href=whatsappUrl(`Hola Orthomax, me interesa recibir información sobre ${link.dataset.treatment}. ¿Podrían ayudarme con disponibilidad y precios?`);
   link.setAttribute('aria-label',`Consultar sobre ${link.dataset.treatment} por WhatsApp`);
 });
-document.querySelectorAll('.gallery-item').forEach(item=>{
+const galleryItems=[...document.querySelectorAll('.gallery-item')];
+let galleryIndex=0;
+function showGalleryImage(index) {
+  galleryIndex=(index+galleryItems.length)%galleryItems.length;
+  const item=galleryItems[galleryIndex];
+  $('lightboxImg').src=item.dataset.full;
+  $('lightboxImg').alt=item.querySelector('img').alt;
+  $('lightboxCaption').textContent=item.querySelector('img').alt;
+  $('lightboxCount').textContent=`${galleryIndex+1} / ${galleryItems.length}`;
+}
+galleryItems.forEach((item,index)=>{
   item.setAttribute('aria-label',`Ampliar: ${item.querySelector('img').alt}`);
   item.addEventListener('click',()=>{
-    $('lightboxImg').src=item.dataset.full;
-    $('lightboxImg').alt=item.querySelector('img').alt;
-    $('lightboxCaption').textContent=item.querySelector('img').alt;
+    showGalleryImage(index);
     lightbox.showModal();
     document.body.classList.add('no-scroll');
   });
 });
 $('lightboxClose').addEventListener('click',()=>lightbox.close());
+$('lightboxPrevious').addEventListener('click',()=>showGalleryImage(galleryIndex-1));
+$('lightboxNext').addEventListener('click',()=>showGalleryImage(galleryIndex+1));
+lightbox.addEventListener('keydown',event=>{
+  if(event.key==='ArrowLeft' || event.key==='ArrowRight') {
+    event.preventDefault();
+    showGalleryImage(galleryIndex+(event.key==='ArrowRight'?1:-1));
+  }
+});
 const navLinks=[...menu.querySelectorAll('a:not(.nav-cta)')];
+if('IntersectionObserver' in window) {
 const observer=new IntersectionObserver(entries=>{
   const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
   if(!visible) return;
@@ -85,6 +102,46 @@ const observer=new IntersectionObserver(entries=>{
   }
 },{rootMargin:'-15% 0px -65% 0px'});
 navLinks.forEach(link=>{ const section=document.querySelector(link.hash); if(section) observer.observe(section); });
+}
+
+// Every treatment stays in the document for reading and crawling without JS.
+const explorer=document.querySelector('.treatment-explorer');
+const treatmentGrid=$('treatmentResults');
+const treatmentCards=[...treatmentGrid.querySelectorAll('[data-category]')];
+const filterButtons=[...explorer.querySelectorAll('[data-filter]')];
+function filterTreatments(category,animate=true) {
+  let count=0;
+  filterButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.filter===category)));
+  treatmentCards.forEach(card=>{
+    card.hidden=category!=='all' && card.dataset.category!==category;
+    card.classList.remove('filter-enter');
+    if(!card.hidden) {
+      count++;
+      card.classList.add('is-visible');
+      if(animate && !reducedMotion.matches) requestAnimationFrame(()=>card.classList.add('filter-enter'));
+    }
+  });
+  treatmentGrid.classList.toggle('is-filtered',category!=='all');
+  $('treatmentStatus').textContent=category==='all'
+    ? '5 tratamientos para conocer. Una valoración para elegir.'
+    : `${count===1?'1 tratamiento relacionado':`${count} tratamientos relacionados`}. La valoración nos ayuda a decidir contigo.`;
+}
+filterButtons.forEach(button=>button.addEventListener('click',()=>filterTreatments(button.dataset.filter)));
+treatmentCards.forEach(card=>card.addEventListener('animationend',()=>card.classList.remove('filter-enter')));
+explorer.hidden=false;
+// Anchor links must still work after a visitor filters a service out.
+function revealTreatmentAnchor(hash,scroll=false) {
+  const target=treatmentCards.find(card=>`#${card.id}`===hash);
+  if(!target) return;
+  if(target.hidden) filterTreatments('all',false);
+  target.classList.add('is-visible');
+  if(scroll) requestAnimationFrame(()=>target.scrollIntoView({behavior:'instant',block:'start'}));
+}
+document.addEventListener('click',event=>{
+  const link=event.target.closest('a[href^="#"]');
+  if(link) revealTreatmentAnchor(link.hash);
+});
+addEventListener('hashchange',()=>revealTreatmentAnchor(location.hash,true));
 
 // Progressive motion: the page stays fully readable without JavaScript and
 // respects the visitor's reduced-motion preference.
@@ -93,33 +150,38 @@ const motionTargets=[...document.querySelectorAll([
   '.section-intro > *', '.why-copy > *', '.center-heading > *',
   '.visit-heading > *', '.faq-layout > *', '.location-heading > *',
   '.service-card', '.benefit', '.treatment-card', '.visit-steps li',
-  '.gallery-item', '.faq-list details', '.location-panel > *'
+  '.gallery-item', '.faq-list details', '.location-panel > *', '.why-image', '.visit-link'
 ].join(','))];
 
+let revealObserver;
 function prepareMotion() {
+  revealObserver?.disconnect();
   const staggerGroups=document.querySelectorAll('.service-grid,.benefits,.treatment-grid,.visit-steps,.gallery-grid,.faq-list');
   staggerGroups.forEach(group=>{
     [...group.children].forEach((item,index)=>item.style.setProperty('--reveal-delay',`${Math.min(index*75,300)}ms`));
   });
 
   if(reducedMotion.matches || !('IntersectionObserver' in window)) {
+    document.documentElement.classList.remove('motion-ready');
     motionTargets.forEach(target=>target.classList.add('is-visible'));
     return;
   }
 
   document.documentElement.classList.add('motion-ready');
   motionTargets.forEach(target=>target.classList.add('reveal'));
-  const revealObserver=new IntersectionObserver(entries=>{
+  revealObserver=new IntersectionObserver(entries=>{
     entries.forEach(entry=>{
       if(!entry.isIntersecting) return;
       entry.target.classList.add('is-visible');
       revealObserver.unobserve(entry.target);
     });
-  },{threshold:.12,rootMargin:'0px 0px -8% 0px'});
+  },{threshold:.08,rootMargin:'0px 0px -24px 0px'});
   motionTargets.forEach(target=>revealObserver.observe(target));
 }
 
 prepareMotion();
+reducedMotion.addEventListener('change',prepareMotion);
+revealTreatmentAnchor(location.hash,true);
 requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelector('.hero')?.classList.add('is-ready')));
 
 // A slim reading-progress line and a little more depth for the sticky header.
@@ -147,6 +209,7 @@ const precisePointer=matchMedia('(pointer:fine)');
 const heroPhoto=document.querySelector('.hero-photo');
 if(!reducedMotion.matches && precisePointer.matches && heroPhoto) {
   heroPhoto.addEventListener('pointermove',event=>{
+    if(reducedMotion.matches || !precisePointer.matches) return;
     const box=heroPhoto.getBoundingClientRect();
     heroPhoto.style.setProperty('--media-x',`${((event.clientX-box.left)/box.width-.5)*10}px`);
     heroPhoto.style.setProperty('--media-y',`${((event.clientY-box.top)/box.height-.5)*10}px`);
@@ -161,6 +224,7 @@ document.querySelectorAll('.service-card,.treatment-card,.visit-steps li').forEa
   card.classList.add('interactive-surface');
   if(reducedMotion.matches || !precisePointer.matches) return;
   card.addEventListener('pointermove',event=>{
+    if(reducedMotion.matches || !precisePointer.matches) return;
     const box=card.getBoundingClientRect();
     card.style.setProperty('--glow-x',`${event.clientX-box.left}px`);
     card.style.setProperty('--glow-y',`${event.clientY-box.top}px`);

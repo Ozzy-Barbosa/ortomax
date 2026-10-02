@@ -25,10 +25,21 @@ test('production requires confirmed configuration and generates coherent SEO out
     assert.match(schema.image,/^https:\/\/clinic.fixture.mx\//);
     assert.equal(schema.logo,'https://clinic.fixture.mx/assets/ortomax-simbolo.png');
     assert.equal(schema.hasOfferCatalog.itemListElement.length,5);
+    const nodes=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(([,json])=>JSON.parse(json));
+    const graph=nodes.find(node=>node['@graph'])['@graph'];
+    const website=graph.find(node=>node['@type']==='WebSite');
+    const webpage=graph.find(node=>node['@type']==='WebPage');
+    assert.equal(website.name,'Orthomax La Paz');
+    assert.equal(website.url,'https://clinic.fixture.mx/');
+    assert.equal(webpage.mainEntity['@id'],schema['@id']);
+    assert.equal(schema.mainEntityOfPage['@id'],webpage['@id']);
+    assert.equal(webpage.isPartOf['@id'],website['@id']);
+    assert.ok(html.includes(`<meta name="twitter:title" content="${webpage.name}">`));
     for (const offer of schema.hasOfferCatalog.itemListElement) {
       const service=offer.itemOffered;
       assert.ok(html.includes(`id="${new URL(service.url).hash.slice(1)}"`));
       assert.equal(service.provider['@id'],schema['@id']);
+      assert.ok(html.includes(service.description));
     }
     assert.match(await readFile(join(work,'dist/robots.txt'),'utf8'),/Sitemap: https:\/\/clinic.fixture.mx\/sitemap.xml/);
     assert.match(await readFile(join(work,'dist/_headers'),'utf8'),/sha256-/);
@@ -52,6 +63,9 @@ test('production requires confirmed configuration and generates coherent SEO out
     assert.match(pagesHtml,/http-equiv="Content-Security-Policy"/);
     assert.ok(!pagesHtml.includes('frame-ancestors'));
     assert.ok(pagesHtml.includes(`sha256-${createHash('sha256').update(json).digest('base64')}`));
+    for(const [,structuredJson] of pagesHtml.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+      assert.ok(pagesHtml.includes(`sha256-${createHash('sha256').update(structuredJson).digest('base64')}`),'Every JSON-LD block must be permitted by the Pages CSP');
+    }
     assert.equal(await readFile(join(work,'dist/.nojekyll'),'utf8'),'');
     assert.equal(spawnSync(process.execPath,['tools/check.mjs','--dist'],{cwd:work,encoding:'utf8'}).status,0);
     const preview=spawnSync(process.execPath,['tools/build.mjs','--preview'],{cwd:work,encoding:'utf8'});

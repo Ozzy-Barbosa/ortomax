@@ -24,23 +24,25 @@ Vista local: http://127.0.0.1:4173. No es necesario ejecutar `npm install`: no h
 5. Sube **solo el contenido de `dist/`**, incluyendo `.htaccess` si usas Apache. No subas la carpeta del proyecto, `.git`, pruebas o herramientas.
 6. Activa certificado HTTPS y la redirección al dominio canónico en el panel del proveedor. Comprueba la web publicada siguiendo la guía.
 
-El build de producción genera las URLs canónicas, Open Graph, tarjeta de redes con una fotografía real existente, sitemap, robots indexable, datos estructurados Dentist y políticas de seguridad. Se detiene si falta el dominio o las confirmaciones. El dominio comprado en GoDaddy ya está definido; todavía no se ha publicado ni cambiado DNS. Consulta `AUDITORIA-SEO.md` para los hallazgos y las acciones posteriores al lanzamiento.
+El build de producción genera las URLs canónicas, Open Graph, tarjeta de redes con una fotografía real existente, sitemap, robots indexable, datos estructurados Dentist, WebSite y WebPage y políticas de seguridad. Se detiene si falta el dominio o las confirmaciones. El sitio está publicado en GitHub Pages con HTTPS y el dominio comprado en GoDaddy. Consulta `AUDITORIA-SEO.md` para los hallazgos y las acciones posteriores al lanzamiento.
 
 ## Qué hace el sitio
 
 - Presentación del consultorio, servicios, tratamientos, primera visita, galería, preguntas frecuentes y ubicación.
+- Explorador de tratamientos por interés, con todos los servicios disponibles sin JavaScript y recuperación de enlaces a tratamientos ocultos por un filtro.
+- Galería navegable mediante botones y flechas del teclado; Escape cierra la imagen.
 - Solicitudes de cita por WhatsApp, con nombre y preferencias; **no reserva horarios ni confirma citas automáticamente**.
 - Horarios filtrados por fecha, domingos y hora actual de La Paz (`America/Mazatlan`), validados de nuevo al continuar.
 - Diálogos nativos con navegación por teclado y Escape, menú adaptable, foco visible y movimiento reducido.
 - Enlaces directos de llamada, mapas y WhatsApp disponibles sin JavaScript. El formulario y la ampliación de imágenes requieren JavaScript.
-- Fuentes e iconos locales con sus licencias, imágenes diferidas salvo portada, mapa oficial incrustado y ausencia de analítica/cookies propias.
+- Fuentes e iconos locales con sus licencias, fotografías WebP y portada adaptable, imágenes diferidas salvo portada, mapa oficial incrustado y ausencia de analítica/cookies propias.
 
 ## Mantenimiento
 
 - `index.html`: contenido, teléfono, dirección, horario, datos estructurados y fotografías. Mantén coherencia entre contenido visible y JSON-LD.
 - `appointment.js`: teléfono de WhatsApp, zona horaria y reglas de horario.
 - `script.js`: interacciones. `styles.css`: diseño y variantes adaptables.
-- `privacidad.html`: explicación del sitio, pendiente de validar/complementar con el aviso integral de la responsable.
+- `privacidad.html`: información del sitio, revisada para el lanzamiento; el aviso integral de la responsable se solicita directamente al consultorio.
 - `assets/ortomax/`: imágenes existentes. Requisitos y futuras fotografías en `LANZAMIENTO.md`.
 - `hosting/`: cabeceras para Apache y hosting estático compatible con `_headers`. La redirección HTTPS depende del proveedor.
 - `assets/tarjeta-digital-orthomax.png`: tarjeta horizontal en alta resolución con datos confirmados y QR directo al sitio seguro.

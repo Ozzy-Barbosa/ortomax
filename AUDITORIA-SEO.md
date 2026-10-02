@@ -50,3 +50,15 @@ No se puede garantizar primera página o primer puesto. Google explica que los r
 - [Google: URLs canónicas](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls).
 - Muestra de mercado: [Clínica Dental Araiza](https://clinicadentalaraiza.com/), [Lau Dental](https://www.laudental.co/), [Doctoralia La Paz](https://www.doctoralia.com.mx/dentista-odontologo/la-paz).
 - Discrepancia a confirmar: [directorio de Orthomax](https://www.allbiz.mx/orthomax-centro-de-especialidades-612-123-0934).
+
+## Renovación editorial y visual — 1 de octubre de 2026
+
+- Portada «Que tu sonrisa hable de ti», con la ubicación y el servicio en el texto visible de apoyo. El título de búsqueda mantiene «Orthomax La Paz | Dentista y ortodoncia en B.C.S.».
+- Textos reescritos sobre tratamientos, primera visita, dudas y ubicación; sin testimonios, credenciales, precios ni resultados clínicos inventados.
+- Selector de tratamientos por interés, mejor navegación de galería, animación de entrada y aparición al desplazarse. Todas las opciones permanecen en el HTML; los filtros no limitan el contenido disponible a buscadores o sin JavaScript.
+- Datos estructurados Dentist vinculados con WebSite y WebPage. Los cinco servicios incluyen descripciones derivadas de sus textos visibles. La política de seguridad admite cada bloque JSON-LD mediante su hash.
+- Canonical, metadatos sociales, robots y sitemap verificados en la salida para GitHub Pages. No se cambió el dominio ni las rutas públicas.
+- Fotografías WebP: 279 676 bytes frente a 417 384 bytes de los JPEG (33 % menos en conjunto), más una variante de portada de 800 px para pantallas pequeñas. Se conservan los originales para ampliar y compartir.
+- Validación: 6 pruebas automatizadas; navegador a 320, 390, 768, 1024 y 1440 px; filtros, enlaces internos tras filtrar, solicitud por WhatsApp interceptada sin enviar mensajes, calendario, galería, FAQ, menú móvil, movimiento reducido y lectura sin JavaScript.
+
+Criterios consultados: [contenido útil para las personas](https://developers.google.com/search/docs/fundamentals/creating-helpful-content), [identidad del sitio en Google](https://developers.google.com/search/docs/appearance/site-names?hl=en) y [datos estructurados de negocios locales](https://developers.google.com/search/docs/appearance/structured-data/local-business). Estos cambios mejoran la presentación, el acceso al contenido y la comprensión del sitio; las posiciones se evalúan con datos reales de Search Console después del rastreo.

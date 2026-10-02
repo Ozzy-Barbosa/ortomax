@@ -19,6 +19,8 @@ await rm(output,{recursive:true,force:true});
 await mkdir(output,{recursive:true});
 await cp('assets','dist/assets',{recursive:true});
 const version = createHash('sha256').update(await readFile('styles.css')).update(await readFile('script.js')).update(await readFile('appointment.js')).digest('hex').slice(0,12);
+const escapeAttribute=value=>value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
+const plainText=value=>value.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 for (const file of ['styles.css','script.js','appointment.js']) await cp(file,`dist/${file}`);
 await writeFile('dist/script.js',(await readFile('script.js','utf8')).replace("'./appointment.js'",`'./appointment.js?v=${version}'`));
 for (const file of ['index.html','privacidad.html','404.html']) {
@@ -30,20 +32,31 @@ for (const file of ['index.html','privacidad.html','404.html']) {
     let metadata = `<link rel="canonical" href="${url}"><meta property="og:url" content="${url}">`;
     if (file === 'index.html') {
       const image = `${origin}/assets/ortomax/consultorio-dental-ortomax.jpeg`;
-      metadata += `<meta property="og:image" content="${image}"><meta property="og:image:width" content="1600"><meta property="og:image:height" content="900"><meta property="og:image:alt" content="Consultorio de Orthomax en La Paz"><meta name="twitter:title" content="Orthomax | Dentista en La Paz"><meta name="twitter:description" content="Ortodoncia y atención dental con un trato cercano. Solicita tu cita en La Paz, B.C.S."><meta name="twitter:image" content="${image}">`;
+      const title=html.match(/<title>(.*?)<\/title>/)[1];
+      const description=html.match(/<meta name="description"\s+content="([^"]+)"/)[1];
+      metadata += `<meta property="og:image" content="${image}"><meta property="og:image:width" content="1600"><meta property="og:image:height" content="900"><meta property="og:image:alt" content="Consultorio de Orthomax en La Paz"><meta name="twitter:title" content="${escapeAttribute(title)}"><meta name="twitter:description" content="${escapeAttribute(description)}"><meta name="twitter:image" content="${image}"><meta name="twitter:image:alt" content="Consultorio de Orthomax en La Paz">`;
+      // A top-level WebSite node gives the brand its own identity in search.
+      const website={
+        '@type':'WebSite','@id':`${origin}/#sitio`,url:origin+'/',name:'Orthomax La Paz',
+        alternateName:['Orthomax','Orthomax Centro Odontológico'],inLanguage:'es-MX',publisher:{'@id':`${origin}/#consultorio`}
+      };
+      const webpage={
+        '@type':'WebPage','@id':`${url}#pagina`,url,name:title,description,inLanguage:'es-MX',
+        isPartOf:{'@id':website['@id']},mainEntity:{'@id':`${origin}/#consultorio`},
+        primaryImageOfPage:{'@type':'ImageObject',url:image,width:1600,height:900}
+      };
+      metadata += `<script type="application/ld+json">${JSON.stringify({'@context':'https://schema.org','@graph':[website,webpage]})}</script>`;
       html = html.replace(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/,(_,json)=>{
         const data=JSON.parse(json); data.url=url; data['@id']=`${origin}/#consultorio`; data.image=image;
         data.logo = `${origin}/assets/ortomax-simbolo.png`;
-        data.mainEntityOfPage = {
-          '@type':'WebPage', '@id':`${url}#pagina`, url,
-          name:html.match(/<title>(.*?)<\/title>/)[1], inLanguage:'es-MX',
-          isPartOf:{'@type':'WebSite','@id':`${origin}/#sitio`,url:origin+'/',name:'Orthomax',alternateName:'Orthomax La Paz',inLanguage:'es-MX'}
-        };
+        data.alternateName=['Orthomax La Paz','Orthomax Centro de Especialidades Odontológicas'];
+        data.mainEntityOfPage = {'@id':webpage['@id']};
         // Derive services from visible cards so structured data cannot drift from the page.
         data.hasOfferCatalog = {
           '@type':'OfferCatalog', name:'Tratamientos dentales en Orthomax',
-          itemListElement:[...html.matchAll(/<article class="treatment-card" id="([^"]+)">([\s\S]*?)<\/article>/g)].map(([,id,card])=>({
+          itemListElement:[...html.matchAll(/<article class="treatment-card" id="([^"]+)"[^>]*>([\s\S]*?)<\/article>/g)].map(([,id,card])=>({
             '@type':'Offer',itemOffered:{'@type':'Service',name:card.match(/<h3>(.*?)<\/h3>/)[1],
+              description:plainText(card.match(/<p>([\s\S]*?)<\/p>/)[1]),
               url:`${url}#${id}`, areaServed:'La Paz, Baja California Sur',provider:{'@id':data['@id']}}
           }))
         };
@@ -57,10 +70,10 @@ for (const file of ['index.html','privacidad.html','404.html']) {
 await writeFile('dist/robots.txt',preview?'User-agent: *\nDisallow: /\n':`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`);
 await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${preview?'':['/','/privacidad.html'].map(path=>`<url><loc>${origin}${path}</loc></url>`).join('')}</urlset>`);
 const builtHome=await readFile('dist/index.html','utf8');
-const schema=builtHome.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
-const schemaHash=createHash('sha256').update(schema).digest('base64');
+const schemaHashes=[...builtHome.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+  .map(([,json])=>`'sha256-${createHash('sha256').update(json).digest('base64')}'`).join(' ');
 for (const file of ['.htaccess','_headers']) {
-  let headers=(await readFile(`hosting/${file}`,'utf8')).replace("script-src 'self'",`script-src 'self' 'sha256-${schemaHash}'`);
+  let headers=(await readFile(`hosting/${file}`,'utf8')).replace("script-src 'self'",`script-src 'self' ${schemaHashes}`);
   if (!preview && file === '.htaccess') {
     const host = new URL(origin).hostname;
     const secondary = host.startsWith('www.') ? host.slice(4) : `www.${host}`;

@@ -231,9 +231,51 @@ document.querySelectorAll('.service-card,.treatment-card,.visit-steps li').forEa
   });
 });
 
-// Keep the questions compact while making each answer feel responsive.
+// Animate the full answer height while keeping native details and keyboard access.
 const questions=[...document.querySelectorAll('.faq-list details')];
-questions.forEach(question=>question.addEventListener('toggle',()=>{
-  if(!question.open) return;
-  questions.forEach(other=>{ if(other!==question) other.open=false; });
+const questionAnimations=new Map();
+const questionIsOpen=question=>questionAnimations.get(question)?.open ?? question.open;
+function finishQuestion(question) {
+  const state=questionAnimations.get(question);
+  if(!state) return;
+  question.open=state.open;
+  state.animation.cancel();
+  questionAnimations.delete(question);
+  question.classList.remove('is-animating','is-closing');
+}
+function setQuestionOpen(question,open) {
+  if(questionIsOpen(question)===open) return;
+  const startHeight=question.getBoundingClientRect().height;
+  questionAnimations.get(question)?.animation.cancel();
+  questionAnimations.delete(question);
+  question.classList.remove('is-animating','is-closing');
+  if(reducedMotion.matches || typeof question.animate!=='function') {
+    question.open=open;
+    return;
+  }
+  // Keep the content visible until a closing animation has finished.
+  question.open=true;
+  const summary=question.querySelector('summary');
+  const borderHeight=question.offsetHeight-question.clientHeight;
+  const endHeight=open ? question.getBoundingClientRect().height : summary.getBoundingClientRect().height+borderHeight;
+  question.classList.add('is-animating');
+  question.classList.toggle('is-closing',!open);
+  const animation=question.animate([{height:`${startHeight}px`},{height:`${endHeight}px`}],{
+    duration:420,easing:'cubic-bezier(.22,1,.36,1)',fill:'both'
+  });
+  questionAnimations.set(question,{animation,open});
+  animation.onfinish=()=>{
+    if(questionAnimations.get(question)?.animation===animation) finishQuestion(question);
+  };
+}
+questions.forEach(question=>question.querySelector('summary').addEventListener('click',event=>{
+  event.preventDefault();
+  const open=!questionIsOpen(question);
+  if(open) questions.forEach(other=>{ if(other!==question) setQuestionOpen(other,false); });
+  setQuestionOpen(question,open);
 }));
+// Release animated heights immediately if text reflows or reduced motion is enabled.
+addEventListener('resize',()=>questionAnimations.forEach((_,question)=>finishQuestion(question)));
+reducedMotion.addEventListener('change',()=>{
+  if(reducedMotion.matches) questionAnimations.forEach((_,question)=>finishQuestion(question));
+});

@@ -89,16 +89,16 @@ h2 span { color:var(--teal); }
 .hero-bottom a span { display:grid; place-items:center; border:1px solid #bccfc1; border-radius:50%; width:30px; height:30px; transition:transform .3s; }
 .hero-bottom a:hover span { transform:translateY(4px); }
 .split { display:grid; grid-template-columns:.8fr 1.2fr; gap:95px; align-items:center; }
-.service-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-.service-card { border:1px solid var(--line); border-radius:16px; min-height:195px; padding:23px 12px; background:#f5f7f0; position:relative; transition:transform .4s var(--ease),box-shadow .4s,border-color .3s; }
+.service-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:16px; }
+.service-card { grid-column:span 2; display:flex; flex-direction:column; align-items:flex-start; min-width:0; border:1px solid var(--line); border-radius:16px; min-height:195px; padding:23px 18px; background:#f5f7f0; position:relative; transition:transform .4s var(--ease),box-shadow .4s,border-color .3s; }
 .service-card:nth-child(2),.service-card:nth-child(5) { background:#eaf4ef; }
-.service-card:nth-child(4) { grid-column:2; }
+.service-card:nth-child(4) { grid-column:2 / span 2; }
 .service-card h3 { font-size:13px; font-weight:600; line-height:1.5; margin:16px 0 6px; }
 .service-icon { width:36px; height:36px; overflow:visible; fill:none; stroke:var(--teal); stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; transition:transform .4s var(--ease); }
 .service-icon .icon-fill { fill:var(--teal); stroke:none; }
 .service-card:hover { transform:translateY(-7px); box-shadow:var(--shadow); border-color:#8bbfb3; }
 .service-card:hover .service-icon { transform:rotate(-6deg) translateY(-3px); }
-.service-detail { display:inline-block; padding:8px 0; color:var(--teal); font-weight:700; font-size:11px; }
+.service-detail { display:inline-block; margin-top:auto; padding:8px 0; color:var(--teal); font-weight:700; font-size:11px; }
 .service-detail::after { content:''; position:absolute; inset:0; }
 .service-detail span { margin-left:8px; }
 .service-card:focus-within { outline:2px solid var(--teal); outline-offset:3px; }
@@ -274,7 +274,6 @@ input:focus,select:focus,textarea:focus { outline:2px solid var(--teal); outline
 }
 @media(min-width:981px) {
  .why-copy { padding-block:15px; }
- .service-card:nth-child(2),.service-card:nth-child(5) { translate:0 18px; }
 }
 @media(max-width:1180px) {
  .container { width:calc(100% - 56px); }
@@ -310,10 +309,7 @@ input:focus,select:focus,textarea:focus { outline:2px solid var(--teal); outline
  .section { padding:80px 0; }
  .split { grid-template-columns:1fr; gap:30px; }
  .section-intro { max-width:620px; }
- .service-grid { grid-template-columns:repeat(5,minmax(0,1fr)); }
- .service-card { padding:20px 12px; min-height:180px; }
- .service-card:nth-child(4) { grid-column:auto; }
- .service-card h3 { font-size:12px; }
+ .service-card { padding:22px; }
  .why-grid { gap:40px; }
  .why-image { height:520px; }
  .benefits { gap:16px; }
@@ -363,10 +359,12 @@ input:focus,select:focus,textarea:focus { outline:2px solid var(--teal); outline
  .hero-bottom a { gap:10px; }
  .hero-bottom a span { width:25px; height:25px; }
  .service-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
- .service-card { min-height:185px; padding:22px; }
+ .service-card { grid-column:auto; min-height:185px; padding:22px; }
+ .service-card:nth-child(4) { grid-column:auto; }
  .service-card h3 { font-size:13px; }
  .service-card:last-child { grid-column:1 / -1; display:grid; grid-template-columns:40px 1fr auto; align-items:center; gap:18px; min-height:105px; }
  .service-card:last-child h3 { margin:0; }
+ .service-card:last-child .service-detail { margin-top:0; }
  .why-grid { grid-template-columns:minmax(0,1fr); gap:30px; }
  .why-image { height:340px; border-bottom-right-radius:80px; }
  .benefits { gap:24px; }
@@ -417,7 +415,7 @@ input:focus,select:focus,textarea:focus { outline:2px solid var(--teal); outline
  .trust-row > div { font-size:9px; gap:4px; }
  .trust-number { width:18px; height:18px; }
  .hero-photo { height:325px; }
- .service-card { padding:20px 15px; }
+ .service-card { padding:20px 12px; }
  .service-card:last-child { gap:12px; }
  .gallery-grid { grid-template-columns:1fr; grid-auto-rows:240px; }
  .gallery-item:nth-child(n) { grid-column:1; }

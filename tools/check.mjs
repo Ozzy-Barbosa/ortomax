@@ -47,3 +47,19 @@ assert.ok(!html.includes('www.facebook.com/'));
 assert.ok(!html.includes('www.instagram.com/'));
 assert.ok(!/https:\/\/(fonts\.|cdnjs)/.test(html));
 console.log('OK: páginas, anclas, recursos locales, fuentes, metadatos y enlaces.');
+
+if (process.argv.includes('--dist')) {
+  const manifest = JSON.parse(await readFile(resolve(root, 'gina/manifest.webmanifest'), 'utf8'));
+  assert.equal(manifest.short_name, 'Gimo');
+  assert.equal(manifest.start_url, '/gina/');
+  assert.equal(manifest.scope, '/gina/');
+  const app = await readFile(resolve(root, 'gina/index.html'), 'utf8');
+  assert.match(app, /<title>Gimo/);
+  assert.match(app, /noindex/);
+  for (const [, path] of app.matchAll(/(?:src|href)="(\/gina\/[^"?#]+)"/g)) await access(resolve(root, path.slice(1)));
+  const worker = await readFile(resolve(root, 'gina/sw.js'), 'utf8');
+  assert.ok(!/indexedDB\.|deleteDatabase/.test(worker));
+  assert.match(worker, /orthomax-gina-shell-/);
+  await access(resolve(root, 'gina/version.json'));
+  console.log('OK: Gimo, recursos compilados, manifiesto y caché acotados a /gina/.');
+}

@@ -6,12 +6,13 @@ Sitio estático en español para Orthomax Centro Odontológico, La Paz, B.C.S. N
 
 ```sh
 npm run dev
+npm ci --prefix apps/gina
 npm test
 npm run check
 npm run build -- --preview
 ```
 
-Vista local: http://127.0.0.1:4173. No es necesario ejecutar `npm install`: no hay dependencias de ejecución ni desarrollo. Abre la página mediante el servidor, no con `file://`, porque el JavaScript utiliza módulos.
+Vista local del consultorio: http://127.0.0.1:4173. El sitio del consultorio no tiene dependencias externas. Gimo, en `apps/gina`, necesita su instalación con `npm ci --prefix apps/gina`. Abre las páginas mediante el servidor, no con `file://`, porque el JavaScript utiliza módulos.
 
 `dist/` contiene la salida de cada compilación y se reemplaza al compilar. No edites esa carpeta directamente. La compilación de vista previa lleva `noindex` y bloquea el rastreo; NO se debe usar como versión pública definitiva.
 
@@ -19,7 +20,7 @@ Vista local: http://127.0.0.1:4173. No es necesario ejecutar `npm install`: no h
 
 1. Sigue `LANZAMIENTO.md` y confirma con la responsable teléfono, dirección, horarios, tratamientos, nombre comercial y privacidad.
 2. El dominio ya está configurado en `site.config.json`: `https://www.orthomaxlapaz.com`. Marca las dos confirmaciones únicamente después de revisar los datos con la responsable.
-3. Ejecuta `npm test`, `npm run check` y `npm run build`.
+3. Ejecuta `npm ci --prefix apps/gina`, `npm test --prefix apps/gina`, `npm test`, `npm run check` y `npm run build`.
 4. Ejecuta `node tools/check.mjs --dist`.
 5. Sube **solo el contenido de `dist/`**, incluyendo `.htaccess` si usas Apache. No subas la carpeta del proyecto, `.git`, pruebas o herramientas.
 6. Activa certificado HTTPS y la redirección al dominio canónico en el panel del proveedor. Comprueba la web publicada siguiendo la guía.
@@ -57,6 +58,10 @@ El título y la descripción para compartir se editan en las etiquetas `og:title
 Tras modificar horarios, actualiza tanto la interfaz, FAQ si corresponde y JSON-LD de `index.html` como las reglas de `appointment.js` y sus pruebas. Tras añadir servicios, sincroniza tarjetas, formulario y metadatos. Conserva siempre los originales de las fotografías fuera de la carpeta pública.
 
 ## GitHub Pages
+
+Gimo es la aplicación financiera personal de la Dra. Gina y vive en `/gina/`. Su fuente, guía y pruebas están en `apps/gina/`. `npm run build` compila ambas aplicaciones y copia Gimo a `dist/gina/`, para conservarla en cada publicación futura del sitio. El flujo de Pages prueba las reglas financieras y la bóveda antes de compilar. Publica siempre el `dist/` completo.
+
+Gimo conserva datos cifrados en el dispositivo de la usuaria. No hay registros financieros en este repositorio ni en Pages. Nunca cambies el nombre de su base de datos, el formato de respaldo ni el origen de la app como parte de una mejora visual. No borres IndexedDB ni desregistres el almacenamiento de la usuaria para actualizar. Las actualizaciones sustituyen solo recursos estáticos. El cambio de marca a Gimo conserva los identificadores históricos `orthomax-gina-*` por compatibilidad.
 
 Publicación autorizada el 3 de septiembre de 2026 para `https://www.orthomaxlapaz.com`. El workflow **Publicar Orthomax** se ejecuta manualmente desde GitHub Actions; valida y publica solo `dist/`, nunca los documentos ni herramientas del proyecto. Usa `npm run build -- --pages` para generar esa versión.
 

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, cp, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, cp, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -11,12 +11,29 @@ test('production requires confirmed configuration and generates coherent SEO out
   try {
     for(const file of ['tools','hosting','assets','index.html','privacidad.html','404.html','styles.css','script.js','appointment.js']) await cp(file,join(work,file),{recursive:true});
     const build=()=>spawnSync(process.execPath,['tools/build.mjs'],{cwd:work,encoding:'utf8'});
+    // A missing app must fail before replacing the existing deployment directory.
+    await writeFile(join(work,'site.config.json'),JSON.stringify({origin:'https://clinic.fixture.mx',businessDetailsConfirmed:true,privacyReviewed:true}));
+    await mkdir(join(work,'dist'));
+    await writeFile(join(work,'dist/previous-release.txt'),'Conservar salida anterior');
+    const missingApp=build();
+    assert.notEqual(missingApp.status,0);
+    assert.match(missingApp.stderr,/Falta la compilación de Gimo/);
+    assert.equal(await readFile(join(work,'dist/previous-release.txt'),'utf8'),'Conservar salida anterior');
+    // Synthetic compiled-app fixture: the actual Gimo source has its own domain and browser tests.
+    const app=join(work,'apps/gina/dist');
+    await mkdir(app,{recursive:true});
+    const appHtml='<!doctype html><html lang="es"><head><title>Gimo · fixture</title><meta name="robots" content="noindex,nofollow"><link rel="manifest" href="/gina/manifest.webmanifest"></head><body><h1>Gimo</h1></body></html>';
+    await writeFile(join(app,'index.html'),appHtml);
+    await writeFile(join(app,'manifest.webmanifest'),JSON.stringify({short_name:'Gimo',start_url:'/gina/',scope:'/gina/'}));
+    await writeFile(join(app,'sw.js'),"const CACHE='orthomax-gina-shell-fixture';");
+    await writeFile(join(app,'version.json'),JSON.stringify({version:'fixture'}));
     await writeFile(join(work,'site.config.json'),JSON.stringify({origin:''}));
     assert.notEqual(build().status,0);
     await writeFile(join(work,'site.config.json'),JSON.stringify({origin:'https://clinic.fixture.mx',businessDetailsConfirmed:false,privacyReviewed:false}));
     assert.notEqual(build().status,0);
     await writeFile(join(work,'site.config.json'),JSON.stringify({origin:'https://clinic.fixture.mx',businessDetailsConfirmed:true,privacyReviewed:true}));
     const built=build(); assert.equal(built.status,0,built.stderr);
+    assert.equal(await readFile(join(work,'dist/gina/index.html'),'utf8'),appHtml);
     const html=await readFile(join(work,'dist/index.html'),'utf8');
     assert.match(html,/<link rel="canonical" href="https:\/\/clinic.fixture.mx\/">/);
     assert.ok(!html.includes('noindex'));

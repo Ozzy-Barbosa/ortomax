@@ -2,6 +2,11 @@ import { readFile, writeFile, mkdir, cp, rm, lstat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve, dirname } from 'node:path';
 const config = JSON.parse(await readFile('site.config.json','utf8'));
+// Every release includes Gimo. Fail before replacing dist if its build is missing.
+const gimoIndex = await readFile('apps/gina/dist/index.html', 'utf8').catch(() => {
+  throw Error('Falta la compilación de Gimo. Ejecuta npm ci --prefix apps/gina y npm run build desde la raíz.');
+});
+if (!gimoIndex.includes('/gina/') || !gimoIndex.includes('Gimo')) throw Error('Compilación de Gimo no válida; se conserva la salida anterior.');
 const preview = process.argv.includes('--preview');
 const pages = process.argv.includes('--pages');
 const originArg = process.argv.find(a=>a.startsWith('--origin='));
@@ -105,4 +110,5 @@ if (pages) {
   await rm('dist/.htaccess');
   await rm('dist/_headers');
 }
-console.log(preview?'Vista previa generada en dist/ (noindex).':'Producción generada en dist/ para '+origin);
+await cp('apps/gina/dist', 'dist/gina', { recursive: true });
+console.log(preview?'Vista previa generada en dist/ (noindex).':'Producción generada en dist/ para '+origin+' · Gimo en /gina/');
